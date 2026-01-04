@@ -6,10 +6,30 @@
 #include <string>
 #include <filesystem>
 #include <sstream>
+#include "tokenizer.hpp"
 namespace fs = std::filesystem;
 
-// tokens:
+// helper function for enum to string, just for my visualization
+std::string typeTokenToString(typeToken tokenType) {
+    switch (tokenType) {
+        case typeToken::_return:
+            return "return";
+        case typeToken::integer_lit:
+            return "integer_lit";
+        case typeToken::semicolon:
+            return "semicolon";
+        default:
+            return "unknown";
+    }
+}
 
+std::ostream& operator<<(std::ostream& os, const Token& token) {
+    os << "Type: " << typeTokenToString(token.type);
+    if (token.content) {
+        os << ", Content: " << *token.content;
+    }
+    return os;
+}
 
 int main(int argc, char* argv[]) {
     // ignore the fact that this is the way you would do this in older C++ versions, I find this way cleaner
@@ -38,7 +58,11 @@ int main(int argc, char* argv[]) {
     buffer << input.rdbuf(); // reading the file to the buffer
 
     std::string content = buffer.str(); // getting the string from the stream
-    std::cout << content;
+//    std::cout << content;
 
+    std::vector<Token> tokens = tokenize(content);
+    for (const Token& token : tokens) {
+        std::cout << token << "\n";
+    }
     return 0;
 }
