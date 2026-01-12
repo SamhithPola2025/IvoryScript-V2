@@ -1,30 +1,25 @@
 // entry-point file
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <filesystem>
-#include <sstream>
 #include "tokenizer.hpp"
 namespace fs = std::filesystem;
 
 // helper function for enum to string, just for my visualization
-std::string typeTokenToString(typeToken tokenType) {
-    switch (tokenType) {
-        case typeToken::_return:
+std::string tokenTypeToString(tokenType tType) {
+    switch (tType) {
+        case tokenType::_return:
             return "return";
-        case typeToken::integer_lit:
+        case tokenType::integer_lit:
             return "integer_lit";
-        case typeToken::semicolon:
+        case tokenType::semicolon:
             return "semicolon";
+        case tokenType::list_type:
+            return "list_type";
         default:
             return "unknown";
     }
 }
 
 std::ostream& operator<<(std::ostream& os, const Token& token) {
-    os << "Type: " << typeTokenToString(token.type);
+    os << "Type: " << tokenTypeToString(token.type);
     if (token.content) {
         os << ", Content: " << *token.content;
     }
