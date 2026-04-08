@@ -11,8 +11,18 @@ std::string tokenTypeToString(tokenType tType) {
             return "integer_lit";
         case tokenType::semicolon:
             return "semicolon";
+        case tokenType::string_type:
+            return "string_type";
         case tokenType::list_type:
             return "list_type";
+        case tokenType::string_lit:
+            return "string_lit";
+        case tokenType::identifier:
+            return "var_name";
+        case tokenType::equal:
+            return "equals";
+        case tokenType::int_type:
+            return "int";
         default:
             return "unknown";
     }

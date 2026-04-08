@@ -1,23 +1,14 @@
 // keep in mind that this is a basic parser, which I will continue to expand on in coming updates
 #include "tokenizer.hpp";
 
-struct Parser {
-    std::vector<Token> tokens;
-    int pos = 0;
+enum class ASTType {
+    program,
+    variable_decl,
+    func_decl,
+    class_decl,
+    
+} 
 
-    Token current() {
-        return tokens[pos];
-    }
+struct ASTNode {
 
-    void advance() {
-        ++pos;
-    }
-
-    bool match(typeToken type) {
-        if (current().type == type) {
-            advance();
-            return true;
-        }
-        return false;
-    }
 };
