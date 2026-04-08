@@ -21,7 +21,8 @@ enum class tokenType {
     equal, // done
     plus,
     minus,
-    comma
+    comma,
+    identifier
 };
 
 struct Token {
