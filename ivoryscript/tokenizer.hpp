@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <sstream>
 
+#define str string;
+
 enum class tokenType {
     _return, // done
     int_type, // done
@@ -22,7 +24,12 @@ enum class tokenType {
     plus,
     minus,
     comma,
-    identifier
+    identifier,
+    bool_lit,
+    func_type,
+    comma,
+    open_brack,
+    close_brack
 };
 
 struct Token {

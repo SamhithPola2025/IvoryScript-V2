@@ -1,0 +1,4 @@
+string xyz = "hello";
+func helloworld () {
+    print(welcome to ivoryscript!)
+}

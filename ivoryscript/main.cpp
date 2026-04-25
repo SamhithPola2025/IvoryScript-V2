@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     if (argc != 2) {
         // error for wrong arguments
         std::cerr << "Incorrect usage, correct usage:" << std::endl;
-        std::cerr << "bshell <input.bsh>" <<  std::endl;
+        std::cerr << "ivscript <input.ivc>" <<  std::endl;
         return 1;
     }
 

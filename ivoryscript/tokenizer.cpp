@@ -2,6 +2,10 @@
 #include "tokenizer.hpp"
 using std::string, std::vector;
 
+bool isIdentC(char c) {
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+}
+
 std::vector<Token> tokenize(std::string& contents) {
     std::vector<Token> tokens;
     std::string currentToken;
@@ -81,7 +85,6 @@ std::vector<Token> tokenize(std::string& contents) {
             }
         }
 
-
         //int literal
         if (isdigit(c)) {
             currentToken = c;
@@ -102,7 +105,53 @@ std::vector<Token> tokenize(std::string& contents) {
             tokens.push_back({tokenType::identifier, name});
         }
         // std::cout << c << "\n";
+        if (contents.substr(i, 4) == "true") {
+            tokens.push_back({tokenType::bool_lit, "true"});
+            continue;
+        } else if (contents.substr(i, 5) == "false") {
+            tokens.push_back({tokenType::bool_lit, "false"});
+            continue;
+        }
+
+        //function
+        if (contents.substr(i, 4) == "func") {
+            std::string ret_type = "void";
+
+            i += 4;
+
+            while (i < contents.size() && isspace(contents[i])) {
+                i++;
+            }
+
+            if (i < contents.size() && isalpha(contents[i])) {
+                std::string possible_type;
+
+                while (i < contents.size() && isalpha(contents[i])) {
+                    possible_type += contents[i];
+                    i++;
+                }
+
+                ret_type = possible_type;
+            }
+
+            tokens.push_back({tokenType::func_type, ret_type});
+            continue;
+        }
+
+        //open/closed paren
+        if (contents.substr(i, 1) == "(") {
+            tokens.push_back({tokenType::open_brack, std::nullopt});
+        } else if (contents.substr(i, 1) == ")") {
+            tokens.push_back({tokenType::close_brack, std::nullopt});
+        }
+
+        //comma
+        if (contents.substr(i, 1) == ",") {
+            tokens.push_back({tokenType::comma, std::nullopt});
+        }
     }
+
+
 
     return tokens;
 }
