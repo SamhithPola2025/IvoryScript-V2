@@ -11,25 +11,29 @@
 #define str string;
 
 enum class tokenType {
-    _return, // done
-    int_type, // done
-    string_type, // done
-    bool_type, // done
-    long_type, // done
-    list_type, // done
+    _return,
+    int_type,
+    string_type,
+    bool_type,
+    long_type,
+    list_type,
     semicolon,
     integer_lit,
-    string_lit, 
-    equal, // done
+    string_lit,
+    equal,
     plus,
     minus,
-    comma,
     identifier,
     bool_lit,
     func_type,
     comma,
     open_brack,
-    close_brack
+    close_brack,
+    print,
+    solidus,
+    ampersand,
+    pipe,
+    eof
 };
 
 struct Token {

@@ -3,6 +3,7 @@
 namespace fs = std::filesystem;
 
 // helper function for enum to string, just for my visualization
+// ignore this for now
 std::string tokenTypeToString(tokenType tType) {
     switch (tType) {
         case tokenType::_return:
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
     }
 
     // next, we need to read the file as a string
-    std::ifstream input(argv[1], std::ios::in);
+    std::ifstream input(argv[1], std::ios::binary);
 
     if (!input) {
         if (!fs::exists(argv[1])) {
@@ -59,10 +60,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::stringstream buffer; // buffer, making space for it in memory
-    buffer << input.rdbuf(); // reading the file to the buffer
+    // switched to newer method the other one did the exact same thing but this is easier
+    std::string content(
+        (std::istreambuf_iterator<char>(input)),
+        std::istreambuf_iterator<char>()
+    );
 
-    std::string content = buffer.str(); // getting the string from the stream
 //    std::cout << content;
 
     std::vector<Token> tokens = tokenize(content);

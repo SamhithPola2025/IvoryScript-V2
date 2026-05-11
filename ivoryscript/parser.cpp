@@ -1,17 +1,58 @@
 #include "tokenizer.hpp"
 #include <string>
 
-struct Stmt {};
+class Parser {
+    const std::vector<Token>& tokens;
+    size_t pos;
 
-class letStmt : Stmt {
-    std::string type;
-    std::string val;
+    public:
+        //constructor
+        Parser(const std::vector<Token>& t)
+            : tokens(t), pos(0) {}
+
+        //helpers
+        const Token& peek() {
+            return tokens[pos];
+        }
+
+        void advance() {
+                pos++;
+        }
+
+        bool match(tokenType token) {
+            if (peek().type == token) {
+                advance();
+                return true;
+            }
+            return false;
+        }
+
+        // returning expressions:
+
+        Expr* 
 };
 
-class returnStmt : Stmt {
-    std::optional<std::string> type;
-    std::string val;
+struct Stmt {
+    virtual void execute() {}
 };
 
+struct Expr {
+    virtual ~Expr() = default;
+};
 
+struct Number : public Expr {
+    int value;
+};
 
+class Addition : public Expr {
+    public: 
+        Expr* left;
+        Expr* right;
+
+        ~Addition () {
+            delete left;
+            delete right;
+        }
+};
+
+// token stream reader

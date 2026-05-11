@@ -17,10 +17,6 @@ std::vector<Token> tokenize(std::string& contents) {
 
         // handle specific tokens
 
-        if (c == ';') {
-            tokens.push_back({tokenType::semicolon, std::nullopt});
-        }
-    
         //string
         if (contents.substr(i, 6) == "string") {
             tokens.push_back({tokenType::string_type});
@@ -30,9 +26,11 @@ std::vector<Token> tokenize(std::string& contents) {
 
         // int
         if (contents.substr(i, 3) == "int") {
-            tokens.push_back({tokenType::int_type});
-            i += 2;
-            continue;
+            if ((contents[i + 1]) && (!isalnum((unsigned char)contents[i-1]))) {
+                tokens.push_back({tokenType::int_type});
+                i += 2;
+                continue;
+            }
         }
 
         // bool
@@ -56,35 +54,6 @@ std::vector<Token> tokenize(std::string& contents) {
             continue;
         }
 
-        if (c == '=') {
-            tokens.push_back({tokenType::equal});
-        }
-
-        if (contents[i] == '"') {
-            std::string value = "";
-            int j = i + 1;
-            while (j < contents.size() && contents[j] != '"') {
-                value.push_back(contents[j]);
-                j++;
-            }
-            if (j < contents.size() && contents[j] == '"') {
-                tokens.push_back({tokenType::string_lit, value});
-                i = j;
-                continue;
-            }
-        }
-        
-        // list_type
-        if (contents[i] == '[') {
-            for (int k = i + 1; k < contents.size(); ++k) {
-                if (contents[k] == ']') {
-                    tokens.push_back({tokenType::list_type});
-                    i = k;
-                    break;
-                }
-            }
-        }
-
         //int literal
         if (isdigit(c)) {
             currentToken = c;
@@ -94,6 +63,7 @@ std::vector<Token> tokenize(std::string& contents) {
             tokens.push_back({tokenType::integer_lit, currentToken});
         }
 
+        //identifier
         if (isalpha(c) || c == '_') {
             std::string name;
             name += c;
@@ -104,6 +74,7 @@ std::vector<Token> tokenize(std::string& contents) {
 
             tokens.push_back({tokenType::identifier, name});
         }
+
         // std::cout << c << "\n";
         if (contents.substr(i, 4) == "true") {
             tokens.push_back({tokenType::bool_lit, "true"});
@@ -138,20 +109,71 @@ std::vector<Token> tokenize(std::string& contents) {
             continue;
         }
 
-        //open/closed paren
-        if (contents.substr(i, 1) == "(") {
-            tokens.push_back({tokenType::open_brack, std::nullopt});
-        } else if (contents.substr(i, 1) == ")") {
-            tokens.push_back({tokenType::close_brack, std::nullopt});
+        //print
+        if (contents.substr(i, 5) == "print") {
+            tokens.push_back({tokenType::print, std::nullopt});
+            continue;
         }
 
-        //comma
-        if (contents.substr(i, 1) == ",") {
-            tokens.push_back({tokenType::comma, std::nullopt});
+        switch (c) {
+            case ';':
+                tokens.push_back({tokenType::semicolon, std::nullopt});
+                continue;
+            case '=':
+                tokens.push_back({tokenType::equal, std::nullopt});
+                continue;
+            case '"': {
+                std::string value = "";
+                int j = i + 1;
+                while (j < contents.size() && contents[j] != '"') {
+                    value.push_back(contents[j]);
+                    j++;
+                }
+                if (j < contents.size() && contents[j] == '"') {
+                    tokens.push_back({tokenType::string_lit, value});
+                    i = j;
+                    continue;
+                }
+                break;
+            }
+            case '[':
+                for (int k = i + 1; k < contents.size(); ++k) {
+                    if (contents[k] == ']') {
+                        tokens.push_back({tokenType::list_type});
+                        i = k;
+                        break;
+                    }
+                }
+                continue;
+            case '(':
+                tokens.push_back({tokenType::open_brack, std::nullopt});
+                continue;
+            case ')':
+                tokens.push_back({tokenType::close_brack, std::nullopt});
+                continue;
+            case ',':
+                tokens.push_back({tokenType::comma, std::nullopt});
+                continue;
+            case '|':
+                tokens.push_back({tokenType::pipe, std::nullopt});
+                continue;
+            case '&':
+                tokens.push_back({tokenType::ampersand, std::nullopt});
+                continue;
+            case '+':
+                tokens.push_back({tokenType::plus, std::nullopt});
+                continue;
+            case '-':
+                tokens.push_back({tokenType::minus, std::nullopt});
+                continue;
+            case '/':
+                tokens.push_back({tokenType::solidus, std::nullopt});
+                continue;
         }
+
     }
-
-
+    
+    tokens.push_back({tokenType::eof, std::nullopt});
 
     return tokens;
 }
