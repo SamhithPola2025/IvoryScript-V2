@@ -2,3 +2,12 @@
 CMakeLists.txt
 build
 .DS_Store
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.o
+*.a
+main
+input.ivc
