@@ -7,12 +7,22 @@ bool isIdentC(char c) {
 }
 
 std::vector<Token> tokenize(std::string& contents) {
+    Tokenizer* tokenizer = new Tokenizer;
+
     std::vector<Token> tokens;
     std::string currentToken;
     // std::cout << contents << std::endl;
 
     for (int i = 0; i < contents.length(); ++i ) {
         char c = contents[i];
+
+        if (c == '\n') {
+            tokenizer->currline++;
+            tokenizer->currcol = 1;
+        } else {
+            tokenizer->currcol++;
+        }
+
         if (isspace(c)) continue;
 
         // handle specific tokens
@@ -115,6 +125,30 @@ std::vector<Token> tokenize(std::string& contents) {
             continue;
         }
 
+        if (contents.substr(i, 2) == "==") {
+            tokens.push_back({tokenType::equal_equal});
+            i += 2;
+            continue;
+        }
+
+        if (contents.substr(i, 2) == "!=") {
+            tokens.push_back({tokenType::not_equal});
+            i += 2;
+            continue;
+        }
+
+        if (contents.substr(i, 2) == ">=") {
+            tokens.push_back({tokenType::greater_equal});
+            i += 2;
+            continue;
+        }
+
+        if (contents.substr(i, 2) == "<=") {
+            tokens.push_back({tokenType::less_equal});
+            i += 2;
+            continue;
+        }
+
         switch (c) {
             case ';':
                 tokens.push_back({tokenType::semicolon, std::nullopt});
@@ -169,8 +203,22 @@ std::vector<Token> tokenize(std::string& contents) {
             case '/':
                 tokens.push_back({tokenType::solidus, std::nullopt});
                 continue;
+            case '*':
+                tokens.push_back({tokenType::asterisk, std::nullopt});
+                continue;
+            case '%':
+                tokens.push_back({tokenType::percent, std::nullopt});
+                continue;
+            case '^':
+                tokens.push_back({tokenType::caret, std::nullopt});
+                continue;
+            case '<':
+                tokens.push_back({tokenType::less, std::nullopt});
+                continue;
+            case '>':
+                tokens.push_back({tokenType::greater, std::nullopt});
+                continue;
         }
-
     }
     
     tokens.push_back({tokenType::eof, std::nullopt});

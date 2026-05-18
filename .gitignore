@@ -11,3 +11,4 @@ build
 *.a
 main
 input.ivc
+main.dSYM

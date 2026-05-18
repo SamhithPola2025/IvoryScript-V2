@@ -33,7 +33,21 @@ enum class tokenType {
     solidus,
     ampersand,
     pipe,
+    asterisk,
+    percent,
+    caret,
+    equal_equal,
+    not_equal,
+    less_equal,
+    greater_equal,
+    less,
+    greater,
     eof
+};
+
+struct Tokenizer {
+    int currline;
+    int currcol;
 };
 
 struct Token {
