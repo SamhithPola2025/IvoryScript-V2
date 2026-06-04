@@ -180,10 +180,10 @@ std::vector<Token> tokenize(std::string& contents) {
                 }
                 continue;
             case '(':
-                tokens.push_back({tokenType::open_brack, std::nullopt});
+                tokens.push_back({tokenType::open_paren, std::nullopt});
                 continue;
             case ')':
-                tokens.push_back({tokenType::close_brack, std::nullopt});
+                tokens.push_back({tokenType::close_paren, std::nullopt});
                 continue;
             case ',':
                 tokens.push_back({tokenType::comma, std::nullopt});
