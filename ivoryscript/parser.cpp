@@ -18,18 +18,16 @@ class Parser {
         }
 
         void advance() {
-            while (peek().type != tokenType::eof){
+            if (pos < tokens.size() - 1) {
                 pos++;
             }
         }
 
-        Token* expect(tokenType expected) {
-            if (expected == tokenType::semicolon) {
-                advance();
-            } else {
-                error("Missing semicolon.");
-                return nullptr;
+        void expect(tokenType expected) {
+            if (peek().type != expected) {
+                error("Unexpected token, expected different type.");
             }
+            advance();
         }
 
         bool match(tokenType token) {
@@ -41,6 +39,7 @@ class Parser {
         }
 
         void error(const std::string& message) {
+            const Token& t = peek();
             std::cout << "Error on line" << tokenizer.currline << "column" << tokenizer.currcol << ". " << message << std::endl;
             exit(1);
         }
@@ -58,17 +57,13 @@ class Parser {
         }
 
         std::unique_ptr<Stmt> parseStmt() {
-            Token t = peek();
-
-            if (t.type == tokenType::_return) {
+            if (peek().type == tokenType::_return) {
                 advance();
 
-                std::unique_ptr<Expr> expr = std::make_unique<Expr>(parseExpr);
-                std::unique_ptr<Stmt> stmt = std::make_unique<ReturnStmt>(expr.get()); // depends on your Expr ownership
-
+                auto expr = parseExpr();
                 expect(tokenType::semicolon);
 
-                return stmt;
+                return std::make_unique<ReturnStmt>(std::move(expr));
             }
 
             error("Unknown Statement");
@@ -79,13 +74,12 @@ class Parser {
             Token t = peek();
             if (t.type == tokenType::integer_lit) {
                 advance();
-                return std::make_unique<Expr>(t);
+                return std::make_unique<Number>(t);
             }
 
             if (t.type == tokenType::open_paren) {
-                
                 advance();
-
+                return std::make_unique<Expr>(t);
             }
 
             return nullptr;
@@ -94,7 +88,10 @@ class Parser {
 
         std::unique_ptr<Expr> parseExpr() {
             Token t = peek();
-         //   if (t.type == tokenType::minus)
+            binaryExpr newExpr = std::make_unique<binaryExpr>;
+            if (t.type == tokenType::minus) {
+                return std::make_unique<Number>(t);
+            }
         }
 
 };
@@ -103,7 +100,19 @@ struct Program {
     std::vector<std::unique_ptr<Stmt>> statements;
 };
 
-struct Expr {};
+struct Expr {
+    virtual ~Expr() = default;
+};
+
+struct binaryExpr : Expr {
+    Token op;
+
+    binaryExpr(Token op, std::unique_ptr<Expr> l, std::unique_ptr<Expr> r)
+    : op(op), left(std::move(l)), right(std::move(r)) {}
+
+    std::unique_ptr<Expr> left;
+    std::unique_ptr<Expr> right;
+};
 
 struct Stmt {
     virtual ~Stmt() = default;
@@ -123,17 +132,8 @@ public:
 
 struct Number : public Expr {
     int value;
+    Number(int v) : value(v) {}
 };
-
-class Addition : public Expr {
-public: 
-    Addition(std::unique_ptr<Expr> r, std::unique_ptr<Expr> l)
-        : right(std::move(r)), left(std::move(l)) {}
-
-    std::unique_ptr<Expr> left;
-    std::unique_ptr<Expr> right;
-};
-
 
 // token stream reader
 // we need to figure out what to do if error
