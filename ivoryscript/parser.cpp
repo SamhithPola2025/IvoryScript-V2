@@ -52,7 +52,7 @@ class Parser {
 
                 program->statements.push_back(std::move(stmt));
             }
-
+            
             return program;
         }
 
@@ -86,14 +86,49 @@ class Parser {
             error("Expression expected.");
         }
 
-        std::unique_ptr<Expr> parseExpr() {
-            Token t = peek();
-            binaryExpr newExpr = std::make_unique<binaryExpr>;
-            if (t.type == tokenType::minus) {
-                return std::make_unique<Number>(t);
+        bool isOperator(tokenType type) {
+            switch (type) {
+                case tokenType::plus:
+                    return true;
+                case tokenType::minus:
+                    return true;
+                case tokenType::slash:
+                    return true;
+                case tokenType::asterisk:
+                    return true;
+                default:
+                    return false;
             }
         }
 
+        std::unique_ptr<Expr> parseExpr() {
+            Token t = peek();
+            if (t.type == tokenType::integer_lit) {
+                advance();
+                int value = std::stoi(*t.value);
+                return std::make_unique<Number>(value);
+            }
+            if (t.type == tokenType::open_paren) {
+                advance();
+                auto expr = parseExpr();
+                expect(tokenType::close_paren);
+                return expr;
+            }
+
+            auto left = parsePrimary();
+
+            if (isOperator(t.type)) {
+
+                auto sign = peek();
+                advance();
+                auto right = parsePrimary();
+                return std::make_unique<binaryExpr>(sign, std::move(left), std::move(right));
+            }
+
+            while(isOperator(t.type)) {
+                //placeholder for chained operations with multiple expressions
+            }
+        }
 };
 
 struct Program {
