@@ -1,4 +1,4 @@
-// tokenizer, it takes the extracted text and turns it into tokens
+// tokenizer.cpp
 #include "tokenizer.hpp"
 using std::string, std::vector;
 

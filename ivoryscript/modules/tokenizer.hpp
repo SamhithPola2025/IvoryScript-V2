@@ -1,4 +1,6 @@
-#pragma once
+// tokenizer.hpp
+#ifndef TOKENIZER_
+#define TOKENIZER_
 
 #include <vector>
 #include <iostream>
@@ -56,3 +58,5 @@ struct Token {
 };
 
 std::vector<Token> tokenize(std::string& contents);
+
+#endif

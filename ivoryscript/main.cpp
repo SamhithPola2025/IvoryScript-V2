@@ -1,9 +1,9 @@
-// entry-point file
-#include "tokenizer.hpp"
+// main.cpp
+#include "modules/tokenizer.hpp"
+#include "modules/parser.hpp"
 namespace fs = std::filesystem;
 
-// helper function for enum to string, just for my visualization
-// ignore this for now
+// enum -> string helper
 std::string tokenTypeToString(tokenType tType) {
     switch (tType) {
         case tokenType::_return:
@@ -38,17 +38,12 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
 }
 
 int main(int argc, char* argv[]) {
-    // ignore the fact that this is the way you would do this in older C++ versions, I find this way cleaner
-    // does the same thing either way
-
     if (argc != 2) {
-        // error for wrong arguments
         std::cerr << "Incorrect usage, correct usage:" << std::endl;
         std::cerr << "ivscript <input.ivc>" <<  std::endl;
         return 1;
     }
 
-    // next, we need to read the file as a string
     std::ifstream input(argv[1], std::ios::binary);
 
     if (!input) {
@@ -60,13 +55,12 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // switched to newer method the other one did the exact same thing but this is easier
     std::string content(
         (std::istreambuf_iterator<char>(input)),
         std::istreambuf_iterator<char>()
     );
 
-//    std::cout << content;
+    // std::cout << content << std::endl;
 
     std::vector<Token> tokens = tokenize(content);
     for (const Token& token : tokens) {
