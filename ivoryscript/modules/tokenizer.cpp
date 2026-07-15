@@ -3,10 +3,11 @@
 using std::string, std::vector;
 
 bool isIdentC(char c) {
-    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_'; 
+    // oops fixed this i forgot alnum only takes unsigned char
 }
 
-std::vector<Token> tokenize(std::string& contents) {
+std::vector<Token> tokenize(const std::string& contents) {
     Tokenizer* tokenizer = new Tokenizer;
 
     std::vector<Token> tokens;

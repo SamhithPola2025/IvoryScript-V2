@@ -1,6 +1,7 @@
 // main.cpp
 #include "modules/tokenizer.hpp"
-#include "modules/parser.hpp"
+#include "modules/ast.hpp"
+#include <iterator>
 namespace fs = std::filesystem;
 
 // enum -> string helper
@@ -55,16 +56,26 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string content(
-        (std::istreambuf_iterator<char>(input)),
+    std::string content{
+        std::istreambuf_iterator<char>(input),
         std::istreambuf_iterator<char>()
-    );
+    };
 
     // std::cout << content << std::endl;
 
+    //tokenizing
+
     std::vector<Token> tokens = tokenize(content);
+
     for (const Token& token : tokens) {
         std::cout << token << "\n";
     }
+
+    //parsing
+
+    Parser p(tokens);
+    std::unique_ptr<Program> program = p.parseProgram();
+
+    
     return 0;
 }

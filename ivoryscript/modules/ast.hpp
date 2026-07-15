@@ -7,6 +7,18 @@
 #include <vector>
 #include <string>
 
+struct Stmt {
+    virtual ~Stmt() = default;
+};
+
+struct Program {
+    std::vector<std::unique_ptr<Stmt>> statements;
+};
+
+struct Expr {
+    virtual ~Expr() = default;
+};
+
 struct ReturnStmt : Stmt {
 public:
     ReturnStmt(std::unique_ptr<Expr> expr)
@@ -21,7 +33,7 @@ public:
         : printExpression(std::move(expr)){}
 
     std::unique_ptr<Expr> printExpression;
-}
+};
 
 struct Number : public Expr {
     int value;
@@ -41,20 +53,39 @@ struct binaryExpr : Expr {
     std::unique_ptr<Expr> right;
 };
 
-struct Stmt {
-    virtual ~Stmt() = default;
-};
+
 
 struct ExprStmt : public Stmt {
     std::unique_ptr<Expr> expr;
 };
 
-struct Program {
-    std::vector<std::unique_ptr<Stmt>> statements;
+class Parser {
+public:
+    Parser(const std::vector<Token>& t);
+
+    std::unique_ptr<Program> parseProgram();
+
+private:
+    const std::vector<Token>& tokens;
+    size_t pos;
+    Tokenizer tokenizer;
+
+    const Token& peek();
+    const Token& peekNext();
+    void advance();
+    void expect(tokenType expected);
+    bool match(tokenType token);
+
+    bool isOperator(tokenType type);
+    bool isExpStarter(tokenType type);
+
+    void error(const std::string& message);
+
+    std::unique_ptr<Stmt> parseStmt();
+    std::unique_ptr<Expr> parsePrimary();
+    std::unique_ptr<Expr> parseTerm();
+    std::unique_ptr<Expr> parseExpr();
 };
 
-struct Expr {
-    virtual ~Expr() = default;
-};
 
 #endif

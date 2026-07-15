@@ -57,6 +57,6 @@ struct Token {
     std::optional<std::string> content;
 };
 
-std::vector<Token> tokenize(std::string& contents);
+std::vector<Token> tokenize(const std::string& contents);
 
 #endif
