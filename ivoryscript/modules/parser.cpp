@@ -1,5 +1,6 @@
 // parser.cpp
 #include "ast.hpp"
+#include "tokenizer.hpp"
 
 Parser::Parser(const std::vector<Token>& t)
     : tokens(t), pos(0) {}
@@ -22,9 +23,21 @@ Parser::Parser(const std::vector<Token>& t)
     }
 
     void Parser::expect(tokenType expected) {
+        helpers helper;
+        auto t = peek().type;
+
+        std::string fullMsg = "Unexpected token \"" + helper.tokenTypeToString(t) + "\", expected \"" + helper.tokenTypeToString(expected) + "\".";
+
+        // for simplification sake
+
         if (peek().type != expected) {
-            error("Unexpected token, expected different type.");
+            if ((expected == tokenType::semicolon) && (t != expected)){
+                error("Expected semicolon.");
+            }
+        } else if (peek().type != expected) {
+            error(fullMsg);
         }
+
         advance();
     }
 
@@ -64,27 +77,40 @@ Parser::Parser(const std::vector<Token>& t)
 
     void Parser::error(const std::string& message) {
         const Token& t = peek();
-        std::cout << "Error on line" << tokenizer.currline << "column" << tokenizer.currcol << ". " << message << std::endl;
-        exit(1);
+        std::cout << "Error on line " << currline << " column " << currcol << ". " << message << std::endl;
+        //exit(1); commented for testing purposes
     }
 
     std::unique_ptr<Program> Parser::parseProgram() {
         std::unique_ptr<Program> program = std::make_unique<Program>();
         while (peek().type != tokenType::eof) {
+            size_t startPos = pos;
             std::unique_ptr<Stmt> stmt = parseStmt();
-            program->statements.push_back(std::move(stmt));
+            if (stmt) {
+                program->statements.push_back(std::move(stmt));
+            }
+
+            // Prevent an infinite loop if parseStmt reports an error without consuming input.
+            if (pos == startPos && peek().type != tokenType::eof) {
+                advance();
+            }
         }
         
         return program;
     }
 
     std::unique_ptr<Stmt> Parser::parseStmt() {
+        
+
         if (peek().type == tokenType::_return) {
             advance();
             std::unique_ptr<Expr> expr = parseExpr();
             expect(tokenType::semicolon);
             return std::make_unique<ReturnStmt>(std::move(expr));
         }
+
+        
+
         if (peek().type == tokenType::print) {
             advance();
             std::unique_ptr<Expr> expr = parseExpr();
@@ -92,8 +118,24 @@ Parser::Parser(const std::vector<Token>& t)
             
             return std::make_unique<PrintStmt>(std::move(expr));
         }
-        error("Unknown Statement");
-        return nullptr;
+
+        // Allow expression statements like: 5 + 6 * 8;
+        std::unique_ptr<Expr> expr = parseExpr();
+        if (!expr) {
+            error("Unknown Statement");
+            return nullptr;
+        }
+
+        if (peek().type == tokenType::semicolon) {
+            advance();
+        } else if (peek().type != tokenType::eof) {
+            error("Expected ';' after expression.");
+            return nullptr;
+        }
+
+        std::unique_ptr<ExprStmt> stmt = std::make_unique<ExprStmt>();
+        stmt->expr = std::move(expr);
+        return stmt;
     }
 
     std::unique_ptr<Expr> Parser::parsePrimary() {

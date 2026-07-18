@@ -7,6 +7,38 @@
 #include <vector>
 #include <string>
 
+// enum -> string helper
+class helpers {
+public:
+std::string tokenTypeToString(tokenType tType) {
+    switch (tType) {
+        case tokenType::_return:
+            return "return";
+        case tokenType::integer_lit:
+            return "integer_lit";
+        case tokenType::semicolon:
+            return "semicolon";
+        case tokenType::string_type:
+            return "string_type";
+        case tokenType::list_type:
+            return "list_type";
+        case tokenType::string_lit:
+            return "string_lit";
+        case tokenType::identifier:
+            return "var_name";
+        case tokenType::equal:
+            return "equals";
+        case tokenType::int_type:
+            return "int";
+        case tokenType::eof:
+            return "whitespace";
+        default:
+            return "unknown";
+    }
+}
+};
+
+
 struct Stmt {
     virtual ~Stmt() = default;
 };
@@ -62,13 +94,11 @@ struct ExprStmt : public Stmt {
 class Parser {
 public:
     Parser(const std::vector<Token>& t);
-
     std::unique_ptr<Program> parseProgram();
 
 private:
     const std::vector<Token>& tokens;
     size_t pos;
-    Tokenizer tokenizer;
 
     const Token& peek();
     const Token& peekNext();

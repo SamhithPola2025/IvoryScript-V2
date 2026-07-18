@@ -12,6 +12,8 @@
 
 #define str string;
 
+inline int currline = 1, currcol = 1;
+
 enum class tokenType {
     _return,
     int_type,
@@ -45,11 +47,6 @@ enum class tokenType {
     less,
     greater,
     eof
-};
-
-struct Tokenizer {
-    int currline;
-    int currcol;
 };
 
 struct Token {

@@ -4,35 +4,10 @@
 #include <iterator>
 namespace fs = std::filesystem;
 
-// enum -> string helper
-std::string tokenTypeToString(tokenType tType) {
-    switch (tType) {
-        case tokenType::_return:
-            return "return";
-        case tokenType::integer_lit:
-            return "integer_lit";
-        case tokenType::semicolon:
-            return "semicolon";
-        case tokenType::string_type:
-            return "string_type";
-        case tokenType::list_type:
-            return "list_type";
-        case tokenType::string_lit:
-            return "string_lit";
-        case tokenType::identifier:
-            return "var_name";
-        case tokenType::equal:
-            return "equals";
-        case tokenType::int_type:
-            return "int";
-        default:
-            return "unknown";
-    }
-}
-
 std::ostream& operator<<(std::ostream& os, const Token& token) {
-    os << "Type: " << tokenTypeToString(token.type);
-    if (token.content) {
+    helpers helper;
+    os << "Type: " << helper.tokenTypeToString(token.type);
+    if (token.content /* exists */) {
         os << ", Content: " << *token.content;
     }
     return os;
@@ -71,11 +46,14 @@ int main(int argc, char* argv[]) {
         std::cout << token << "\n";
     }
 
+
     //parsing
 
     Parser p(tokens);
     std::unique_ptr<Program> program = p.parseProgram();
 
-    
+    std::cout << "placeholder btw" << std::endl;
+    std::cout << "idfk" << std::endl;
+
     return 0;
 }

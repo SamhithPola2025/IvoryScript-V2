@@ -8,8 +8,6 @@ bool isIdentC(char c) {
 }
 
 std::vector<Token> tokenize(const std::string& contents) {
-    Tokenizer* tokenizer = new Tokenizer;
-
     std::vector<Token> tokens;
     std::string currentToken;
     // std::cout << contents << std::endl;
@@ -18,10 +16,10 @@ std::vector<Token> tokenize(const std::string& contents) {
         char c = contents[i];
 
         if (c == '\n') {
-            tokenizer->currline++;
-            tokenizer->currcol = 1;
+            currline++;
+            currcol = 1;
         } else {
-            tokenizer->currcol++;
+            currcol++;
         }
 
         if (isspace(c)) continue;
@@ -62,6 +60,13 @@ std::vector<Token> tokenize(const std::string& contents) {
         if (contents.substr(i, 6) == "return") {
             tokens.push_back({tokenType::_return});
             i += 5;
+            continue;
+        }
+
+        //print
+        if (contents.substr(i, 5) == "print") {
+            tokens.push_back({tokenType::print, std::nullopt});
+            i += 4;
             continue;
         }
 
@@ -117,12 +122,6 @@ std::vector<Token> tokenize(const std::string& contents) {
             }
 
             tokens.push_back({tokenType::func_type, ret_type});
-            continue;
-        }
-
-        //print
-        if (contents.substr(i, 5) == "print") {
-            tokens.push_back({tokenType::print, std::nullopt});
             continue;
         }
 

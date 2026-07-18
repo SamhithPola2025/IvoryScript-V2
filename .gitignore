@@ -12,3 +12,5 @@ build
 main
 input.ivc
 main.dSYM
+build
+.cache
