@@ -33,6 +33,8 @@ enum class tokenType {
     comma,
     open_paren,
     close_paren,
+    open_brace,
+    close_brace,
     print,
     solidus,
     ampersand,
@@ -46,6 +48,7 @@ enum class tokenType {
     greater_equal,
     less,
     greater,
+    sl_comment,
     eof
 };
 

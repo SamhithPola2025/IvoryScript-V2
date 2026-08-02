@@ -14,3 +14,5 @@ input.ivc
 build
 .cache
 main.dSYM
+main.dSYM/Contents
+/Users/samhith/Developer/IvoryScript-V2/main.dSYM/Contents

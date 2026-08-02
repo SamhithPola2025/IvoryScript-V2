@@ -12,7 +12,7 @@ std::vector<Token> tokenize(const std::string& contents) {
     std::string currentToken;
     // std::cout << contents << std::endl;
 
-    for (int i = 0; i < contents.length(); ++i ) {
+    for (int i = 0; i < contents.length(); ++i) {
         char c = contents[i];
 
         if (c == '\n') {
@@ -35,10 +35,14 @@ std::vector<Token> tokenize(const std::string& contents) {
 
         // int
         if (contents.substr(i, 3) == "int") {
-            if ((contents[i + 1]) && (!isalnum((unsigned char)contents[i-1]))) {
-                tokens.push_back({tokenType::int_type});
-                i += 2;
-                continue;
+            if (i != 0) {
+                if ((contents[i + 1]) && (!isalnum((unsigned char)contents[i-1]))) {
+                    tokens.push_back({tokenType::int_type});
+                    i += 2;
+                    continue;
+                }
+            } else {
+                
             }
         }
 
@@ -79,27 +83,6 @@ std::vector<Token> tokenize(const std::string& contents) {
             tokens.push_back({tokenType::integer_lit, currentToken});
         }
 
-        //identifier
-        if (isalpha(c) || c == '_') {
-            std::string name;
-            name += c;
-
-            while (i + 1 < contents.size() && (isalnum(contents[i+1]) || contents[i+1] == '_')) {
-                name += contents[++i];
-            }
-
-            tokens.push_back({tokenType::identifier, name});
-        }
-
-        // std::cout << c << "\n";
-        if (contents.substr(i, 4) == "true") {
-            tokens.push_back({tokenType::bool_lit, "true"});
-            continue;
-        } else if (contents.substr(i, 5) == "false") {
-            tokens.push_back({tokenType::bool_lit, "false"});
-            continue;
-        }
-
         //function
         if (contents.substr(i, 4) == "func") {
             std::string ret_type = "void";
@@ -125,28 +108,60 @@ std::vector<Token> tokenize(const std::string& contents) {
             continue;
         }
 
+        //identifier
+        if (isalpha(c) || c == '_') {
+            std::string name;
+            name += c;
+
+            while (i + 1 < contents.size() && (isalnum(contents[i+1]) || contents[i+1] == '_')) {
+                name += contents[++i];
+            }
+
+            tokens.push_back({tokenType::identifier, name});
+        }
+
+        // std::cout << c << "\n";
+        if (contents.substr(i, 4) == "true") {
+            tokens.push_back({tokenType::bool_lit, "true"});
+            continue;
+        }
+        
+        if (contents.substr(i, 5) == "false") {
+            tokens.push_back({tokenType::bool_lit, "false"});
+            continue;
+        }
+        
         if (contents.substr(i, 2) == "==") {
             tokens.push_back({tokenType::equal_equal});
             i += 2;
             continue;
         }
-
+        
         if (contents.substr(i, 2) == "!=") {
             tokens.push_back({tokenType::not_equal});
             i += 2;
             continue;
         }
-
+        
         if (contents.substr(i, 2) == ">=") {
             tokens.push_back({tokenType::greater_equal});
             i += 2;
             continue;
         }
-
+        
         if (contents.substr(i, 2) == "<=") {
             tokens.push_back({tokenType::less_equal});
             i += 2;
             continue;
+        }
+        
+        if (contents.substr(i, 1) == std::string({'/'})) {
+            i++;
+            if (contents.substr(i, 1) == std::string({'/'})) {
+                // this is a comment
+                tokens.push_back({tokenType::sl_comment});
+            } else {
+                tokens.push_back({tokenType::solidus});
         }
 
         switch (c) {
@@ -185,6 +200,12 @@ std::vector<Token> tokenize(const std::string& contents) {
             case ')':
                 tokens.push_back({tokenType::close_paren, std::nullopt});
                 continue;
+            case '{':
+                tokens.push_back({tokenType::open_brace, std::nullopt});
+                continue;
+            case '}':
+                tokens.push_back({tokenType::close_brace, std::nullopt});
+                continue;
             case ',':
                 tokens.push_back({tokenType::comma, std::nullopt});
                 continue;
@@ -199,9 +220,6 @@ std::vector<Token> tokenize(const std::string& contents) {
                 continue;
             case '-':
                 tokens.push_back({tokenType::minus, std::nullopt});
-                continue;
-            case '/':
-                tokens.push_back({tokenType::solidus, std::nullopt});
                 continue;
             case '*':
                 tokens.push_back({tokenType::asterisk, std::nullopt});

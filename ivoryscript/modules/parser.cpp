@@ -1,6 +1,7 @@
 // parser.cpp
 #include "ast.hpp"
 #include "tokenizer.hpp"
+#include <memory>
 
 Parser::Parser(const std::vector<Token>& t)
     : tokens(t), pos(0) {}
@@ -76,9 +77,13 @@ Parser::Parser(const std::vector<Token>& t)
     }
 
     void Parser::error(const std::string& message) {
-        const Token& t = peek();
         std::cout << "Error on line " << currline << " column " << currcol << ". " << message << std::endl;
-        //exit(1); commented for testing purposes
+        //exit(1); commented for debugging purposes
+    }
+
+    void Parser::printError(const std::string& message) {
+        std::cout << "Error on line " << currline << " column " << currcol << ". " << message << std::endl;
+        //exit(1); commented for debugging purposes
     }
 
     std::unique_ptr<Program> Parser::parseProgram() {
@@ -86,6 +91,12 @@ Parser::Parser(const std::vector<Token>& t)
         while (peek().type != tokenType::eof) {
             size_t startPos = pos;
             std::unique_ptr<Stmt> stmt = parseStmt();
+           // std::unique_ptr<Stmt> inlineStmt = parseStmt();
+
+            /*
+            if (isInline && inlineStmt) {
+                program->statements[]
+            } else if (stmt) */
             if (stmt) {
                 program->statements.push_back(std::move(stmt));
             }
@@ -100,8 +111,7 @@ Parser::Parser(const std::vector<Token>& t)
     }
 
     std::unique_ptr<Stmt> Parser::parseStmt() {
-        
-
+        //return statement
         if (peek().type == tokenType::_return) {
             advance();
             std::unique_ptr<Expr> expr = parseExpr();
@@ -109,8 +119,32 @@ Parser::Parser(const std::vector<Token>& t)
             return std::make_unique<ReturnStmt>(std::move(expr));
         }
 
-        
+        if (peek().type == tokenType::func_type) {
+            std::unique_ptr<Expr> expr = nullptr;
 
+            std::unique_ptr<FuncStmt> fStmt = std::make_unique<FuncStmt>(std::move(expr));
+            
+            if (peek().content) {
+                fStmt->checkReturnType(peek());
+                advance();
+            } else {
+                error("No function return type present");
+            }
+
+            expect(tokenType::open_brace);
+
+            while (peek().type != tokenType::eof && peek().type != tokenType::close_brace) {
+                fStmt->funcStmts.push_back(parseStmt());
+                expect(tokenType::semicolon);
+            }
+
+            expect(tokenType::close_brace);
+
+            advance();
+            return fStmt;
+        }
+        
+        //print statement
         if (peek().type == tokenType::print) {
             advance();
             std::unique_ptr<Expr> expr = parseExpr();
@@ -179,3 +213,23 @@ Parser::Parser(const std::vector<Token>& t)
         }
         return left;
     }
+
+std::vector<std::string> validRetTypes = {"void", "int", "string", "bool"};
+
+void FuncStmt::checkReturnType(Token funcT) {
+    if (funcT.content) {
+        retT = std::make_unique<std::string>(funcT.content.value());
+
+        for (int i = 0; i < validRetTypes.size(); ++i) {
+            if (i <= validRetTypes.size()) {
+                if (*retT == validRetTypes[i]) {
+                    break;
+                }
+            } else {
+                Parser::printError("Invalid function return type present");
+            }
+        }
+    } else {
+        Parser::printError("No function return type present.");
+    }
+}

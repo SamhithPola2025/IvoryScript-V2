@@ -3,6 +3,7 @@
 #define AST_HPP
 
 #include "tokenizer.hpp"
+#include <cstddef>
 #include <memory>
 #include <vector>
 #include <string>
@@ -32,12 +33,21 @@ std::string tokenTypeToString(tokenType tType) {
             return "int";
         case tokenType::eof:
             return "whitespace";
+        case tokenType::plus:
+            return "plus";
+        case tokenType::minus:
+            return "minus";
+        case tokenType::asterisk:
+            return "asterisk";
+        case tokenType::solidus:
+            return "solidus";
+        case tokenType::pipe:
+            return "pipe";
         default:
             return "unknown";
     }
 }
 };
-
 
 struct Stmt {
     virtual ~Stmt() = default;
@@ -65,6 +75,18 @@ public:
         : printExpression(std::move(expr)){}
 
     std::unique_ptr<Expr> printExpression;
+};
+
+struct FuncStmt : Stmt {
+public:
+    FuncStmt(std::unique_ptr<Expr> expr)
+        : funcExpression(std::move(expr)){}
+
+    std::unique_ptr<std::string> retT;
+    void checkReturnType (Token funcT);
+    std::vector<std::unique_ptr<Stmt>> funcStmts;
+
+    std::unique_ptr<Expr> funcExpression;
 };
 
 struct Number : public Expr {
@@ -100,16 +122,23 @@ private:
     const std::vector<Token>& tokens;
     size_t pos;
 
+    std::unique_ptr<Stmt> currentNode; 
+    bool isInline = false;
+
     const Token& peek();
     const Token& peekNext();
     void advance();
-    void expect(tokenType expected);
+
     bool match(tokenType token);
 
     bool isOperator(tokenType type);
     bool isExpStarter(tokenType type);
 
+public:
     void error(const std::string& message);
+    static void printError(const std::string& message);
+
+    void expect(tokenType expected);
 
     std::unique_ptr<Stmt> parseStmt();
     std::unique_ptr<Expr> parsePrimary();
