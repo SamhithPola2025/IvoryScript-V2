@@ -1,2 +1,5 @@
-# IvoryScript-V2
-A programming language that lets you write code fast, and make sure the code is impactful.
+# IvoryScript
+
+This project was submitted to the Macondo YSWS (you ship - we ship) program, which is part of [Hack Club](hackclub.com).
+
+
