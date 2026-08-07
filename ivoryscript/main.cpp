@@ -1,20 +1,22 @@
 // main.cpp
 #include "modules/tokenizer.hpp"
-#include "modules/ast.hpp"
+#include "modules/parser.hpp"
 #include <iterator>
 namespace fs = std::filesystem;
 
 std::ostream& operator<<(std::ostream& os, const Token& token) {
     helpers helper;
     os << "Type: " << helper.tokenTypeToString(token.type);
-    if (token.content /* exists */) {
+    if (token.content) {
         os << ", Content: " << *token.content;
     }
     return os;
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc == 1) {
+
+    } else {
         std::cerr << "Incorrect usage, correct usage:" << std::endl;
         std::cerr << "ivscript <input.ivc>" <<  std::endl;
         return 1;

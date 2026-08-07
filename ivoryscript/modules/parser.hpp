@@ -114,10 +114,6 @@ struct ExprStmt : public Stmt {
 };
 
 class Parser {
-public:
-    Parser(const std::vector<Token>& t);
-    std::unique_ptr<Program> parseProgram();
-
 private:
     const std::vector<Token>& tokens;
     size_t pos;
@@ -135,6 +131,9 @@ private:
     bool isExpStarter(tokenType type);
 
 public:
+    Parser(const std::vector<Token>& t);
+    std::unique_ptr<Program> parseProgram();
+
     void error(const std::string& message);
     static void printError(const std::string& message);
 

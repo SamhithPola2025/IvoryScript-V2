@@ -10,8 +10,6 @@
 #include <filesystem>
 #include <sstream>
 
-#define str string;
-
 inline int currline = 1, currcol = 1;
 
 enum class tokenType {

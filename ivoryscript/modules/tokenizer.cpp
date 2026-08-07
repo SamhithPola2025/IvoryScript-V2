@@ -242,4 +242,6 @@ std::vector<Token> tokenize(const std::string& contents) {
     tokens.push_back({tokenType::eof, std::nullopt});
 
     return tokens;
+    
+    }
 }

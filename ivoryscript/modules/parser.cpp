@@ -1,5 +1,5 @@
 // parser.cpp
-#include "ast.hpp"
+#include "parser.hpp"
 #include "tokenizer.hpp"
 #include <memory>
 
@@ -119,13 +119,17 @@ Parser::Parser(const std::vector<Token>& t)
             return std::make_unique<ReturnStmt>(std::move(expr));
         }
 
+        // curr 
+
         if (peek().type == tokenType::func_type) {
             std::unique_ptr<Expr> expr = nullptr;
 
-            std::unique_ptr<FuncStmt> fStmt = std::make_unique<FuncStmt>(std::move(expr));
+            std::unique_ptr<FuncStmt> returnKw = std::make_unique<FuncStmt>(std::move(expr)); // renamed for sake of clarity
             
+            advance();
+
             if (peek().content) {
-                fStmt->checkReturnType(peek());
+                returnKw->checkReturnType(peek());
                 advance();
             } else {
                 error("No function return type present");
@@ -134,14 +138,15 @@ Parser::Parser(const std::vector<Token>& t)
             expect(tokenType::open_brace);
 
             while (peek().type != tokenType::eof && peek().type != tokenType::close_brace) {
-                fStmt->funcStmts.push_back(parseStmt());
+                returnKw->funcStmts.push_back(parseStmt());
                 expect(tokenType::semicolon);
             }
 
-            expect(tokenType::close_brace);
+            if (peek().type == tokenType::close_brace) isInline = false;
+            else error("Closing brace expected at end of statement.");
 
             advance();
-            return fStmt;
+            return returnKw;
         }
         
         //print statement
