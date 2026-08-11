@@ -1,12 +1,13 @@
 // main.cpp
 #include "modules/tokenizer.hpp"
 #include "modules/parser.hpp"
+#include "modules/repl.hpp"
 #include <iterator>
+
 namespace fs = std::filesystem;
 
 std::ostream& operator<<(std::ostream& os, const Token& token) {
-    helpers helper;
-    os << "Type: " << helper.tokenTypeToString(token.type);
+    os << "Type: " << tokenTypeToString(token.type);
     if (token.content) {
         os << ", Content: " << *token.content;
     }
@@ -15,10 +16,14 @@ std::ostream& operator<<(std::ostream& os, const Token& token) {
 
 int main(int argc, char* argv[]) {
     if (argc == 1) {
+        replEval *REPL;
+        REPL->replLoop();
 
-    } else {
+        return 0;
+    } else if (argc != 2) {
         std::cerr << "Incorrect usage, correct usage:" << std::endl;
         std::cerr << "ivscript <input.ivc>" <<  std::endl;
+
         return 1;
     }
 
@@ -26,7 +31,7 @@ int main(int argc, char* argv[]) {
 
     if (!input) {
         if (!fs::exists(argv[1])) {
-            std::cerr << "File " << argv[1] << " doesn't exist or is corrupted" << std::endl;
+            std::cerr << "File" << argv[1] << " doesn't exist or is corrupted" << std::endl;
         } else {
             std::cerr << "Failed to open/read file: " << argv[1] << std::endl;
         }
@@ -47,7 +52,6 @@ int main(int argc, char* argv[]) {
     for (const Token& token : tokens) {
         std::cout << token << "\n";
     }
-
 
     //parsing
 

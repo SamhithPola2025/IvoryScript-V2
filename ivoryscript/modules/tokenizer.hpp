@@ -1,14 +1,13 @@
 // tokenizer.hpp
-#ifndef TOKENIZER_
-#define TOKENIZER_
+#pragma once
 
-#include <vector>
-#include <iostream>
-#include <string>
-#include <optional>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <optional>
 #include <sstream>
+#include <string>
+#include <vector>
 
 inline int currline = 1, currcol = 1;
 
@@ -34,6 +33,8 @@ enum class tokenType {
     open_brace,
     close_brace,
     print,
+    exit,
+    docs,
     solidus,
     ampersand,
     pipe,
@@ -53,8 +54,11 @@ enum class tokenType {
 struct Token {
     tokenType type;
     std::optional<std::string> content;
+
+    bool operator==(const Token &other) const {
+        return this->type == other.type &&
+               this->content.value() == other.content.value();
+    }
 };
 
-std::vector<Token> tokenize(const std::string& contents);
-
-#endif
+std::vector<Token> tokenize(const std::string &contents);

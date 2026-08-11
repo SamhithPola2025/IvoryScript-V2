@@ -2,6 +2,8 @@
 
 IvoryScript is a compiled, bytecode-based, general-purpose programming language implemented in C++. It is designed for writing algorithms, application-level code, and developer tooling, emphasizing low-level control and predictable execution.
 
+IvoryScript provides you with the freedom that you need 
+
 - Language Classification: Compiled (Bytecode-compiled, not AOT native)
 
 - Purpose: General-purpose language that can be used for solving algorithmic problems, building applications and making developer tools in.

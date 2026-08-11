@@ -91,7 +91,7 @@ int count(5);
 
 ## Control flow (examples)
 
-- If:
+- If Statement:
 ```
 if (cond) {
     // true-branch
@@ -99,7 +99,12 @@ if (cond) {
     // false-branch
 }
 ```
-- While:
+- For Loop:
+```
+for (initialization given )
+```
+
+- While Loop:
 ```
 while (cond) {
     // body
