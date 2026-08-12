@@ -1,6 +1,9 @@
 // parser.cpp
 #include "parser.hpp"
 #include "tokenizer.hpp"
+#include "symtab.hpp"
+#include "helpers.hpp"
+
 #include <cassert>
 #include <memory>
 
@@ -34,8 +37,6 @@ void Parser::expect(tokenType expected) {
                           "\", expected \"" + tokenTypeToString(expected) +
                           "\".";
 
-    // for simplification sake
-
     if (peek().type != expected) {
         if ((expected == tokenType::semicolon) && (t != expected)) {
             error("Expected semicolon.");
@@ -47,6 +48,7 @@ void Parser::expect(tokenType expected) {
     advance();
 }
 
+// wtf is this func why did i write this
 bool Parser::match(tokenType token) {
     if (peek().type == token) {
         advance();
@@ -82,13 +84,13 @@ bool Parser::isExpStarter(tokenType type) {
 }
 
 void Parser::error(const std::string &message) {
-    std::cout << "Error on line " << currline << " column " << currcol << ". "
+    std::cerr << "Error on line " << currline << " column " << currcol << ". "
               << message << std::endl;
     // exit(1); commented for debugging purposes
 }
 
 void Parser::printError(const std::string &message) {
-    std::cout << "Error on line " << currline << " column " << currcol << ". "
+    std::cerr << "Error on line " << currline << " column " << currcol << ". "
               << message << std::endl;
     // exit(1); commented for debugging purposes
 }
@@ -130,35 +132,59 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
     // curr
 
     if (peek().type == tokenType::func_type) {
-        std::unique_ptr<Expr> expr = nullptr;
+		symbolTableHandler sym_tab_handler;
+        bool hasParams = false;
 
-        std::unique_ptr<FuncStmt> returnKw = std::make_unique<FuncStmt>(
-            std::move(expr)); // renamed for sake of clarity
+        std::unique_ptr<funcStmt> funcKw;
+        Symbol funSym(funcKw.get());
 
         advance();
 
         if (peek().content) {
-            returnKw->checkReturnType(peek());
+            funcKw->checkRetType(peek());
             advance();
         } else {
             error("No function return type present");
+        }
+
+		advance();
+		Token name = peek();
+
+		if (peek().type != tokenType::identifier) {
+            error("Expected identifier.");
+		}
+        
+		if (peek().type == tokenType::open_paren && peekNext().type != tokenType::close_paren) {
+            hasParams = true;
+			while (peek().type != tokenType::close_paren) {
+                parseStmt();
+                if (!isControlFlow) {
+                   expect(tokenType::semicolon); 
+                } else {
+                    continue;
+                }
+            }
+		} else {
+            hasParams = false;
         }
 
         expect(tokenType::open_brace);
 
         while (peek().type != tokenType::eof &&
                peek().type != tokenType::close_brace) {
-            returnKw->funcStmts.push_back(parseStmt());
+            funcKw->funcStmts.push_back(parseStmt());
             expect(tokenType::semicolon);
         }
 
-        if (peek().type == tokenType::close_brace)
+        if (peek().type == tokenType::close_brace) {
             isInline = false;
-        else
+		} else {
             error("Closing brace expected at end of statement.");
+		}
 
         advance();
-        return returnKw;
+
+		sym_tab_handler.pushToTable(*name.name, funSym);
     }
 
     // print statement
@@ -244,14 +270,14 @@ std::string toUpper(std::string str) {
     return str;
 }
 
-void FuncStmt::checkType(Token valT) { // fixed
-    if (valT.content) {
+void funcStmt::checkRetType(Token funcT) { // fixed
+    if (funcT.content) {
 		retT = stringToEnum(funcT.content.value());
 
         bool valid = retT != dataType::COUNT;
 
         if (!valid) {
-            Parser::printError("Invalid function return type present");
+            Parser::printError("Invalid function return type present.");
         }
 
     } else {
@@ -259,45 +285,17 @@ void FuncStmt::checkType(Token valT) { // fixed
     }
 }
 
-void symbolTableHandler::pushToTable(std::string name, Symbol &symbol) {
-	long scopes = symbolTables.size();
+void varStmt::checkType(Token varT) {
+	if (varT.content) {
+		type = stringToEnum(varT.content.value());
 
-	if (symbol.Scope != symbolTables.back().Scope) {
-		for (int i = 0; i < scopes; ++i) {
-			auto &s = symbolTables[i];
+		bool valid = type != dataType::COUNT;
 
-			if (s.Scope == symbol.Scope) {
-				symbolTables[i].symbols[name] = symbol;
-			} else {
-				continue;
-			}
+		if (!valid) {
+			Parser::printError("Invalid data type present.");
 		}
+
 	} else {
-		symbolTables.emplace_back(Context({symbol.Scope})); // agreggate initialization
-		symbolTables.back().symbols[name] = symbol;
-	}
-}
-
-std::pair<std::string, Symbol> symbolTableHandler::pullFromTable(std::string name, Symbol &symbol, bool &isFuncCall) {
-	bool isFound = false;
-
-	if (symbol.Scope == symbolTables.back().Scope) {
-		std::clog << "matched";
-		return make_pair(name, symbolTables.back().symbols[name]);
-	} else {
-		for (int i = symbolTables.size() - 1; i >= 0; ++i) {
-			if (symbolTables[i].Scope == symbol.Scope) {
-				return make_pair(name, symbolTables[i].symbols[name]);
-				isFound = true;
-			} else {
-				continue;
-				isFound = false;
-			}
-		}
-
-		if (!isFound) {
-			std::cerr << "Invalid " << (isFuncCall ? "function called: ": "variable accessed: ") << name << "\n";
-		}
-
+		Parser::printError("Unexpected identifier " + *varT.name);
 	}
 }
