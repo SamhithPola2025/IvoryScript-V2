@@ -1,8 +1,8 @@
 // parser.cpp
 #include "parser.hpp"
-#include "tokenizer.hpp"
-#include "symtab.hpp"
 #include "helpers.hpp"
+#include "symtab.hpp"
+#include "tokenizer.hpp"
 
 #include <cassert>
 #include <memory>
@@ -132,10 +132,10 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
     // curr
 
     if (peek().type == tokenType::func_type) {
-		symbolTableHandler sym_tab_handler;
+        symbolTableHandler sym_tab_handler;
         bool hasParams = false;
 
-        std::unique_ptr<funcStmt> funcKw;
+        std::unique_ptr<FuncStmt> funcKw;
         Symbol funSym(funcKw.get());
 
         advance();
@@ -147,24 +147,25 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
             error("No function return type present");
         }
 
-		advance();
-		Token name = peek();
+        advance();
+        Token name = peek();
 
-		if (peek().type != tokenType::identifier) {
+        if (peek().type != tokenType::identifier) {
             error("Expected identifier.");
-		}
-        
-		if (peek().type == tokenType::open_paren && peekNext().type != tokenType::close_paren) {
+        }
+
+        if (peek().type == tokenType::open_paren &&
+            peekNext().type != tokenType::close_paren) {
             hasParams = true;
-			while (peek().type != tokenType::close_paren) {
+            while (peek().type != tokenType::close_paren) {
                 parseStmt();
                 if (!isControlFlow) {
-                   expect(tokenType::semicolon); 
+                    expect(tokenType::semicolon);
                 } else {
                     continue;
                 }
             }
-		} else {
+        } else {
             hasParams = false;
         }
 
@@ -178,13 +179,13 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
 
         if (peek().type == tokenType::close_brace) {
             isInline = false;
-		} else {
+        } else {
             error("Closing brace expected at end of statement.");
-		}
+        }
 
         advance();
 
-		sym_tab_handler.pushToTable(*name.name, funSym);
+        sym_tab_handler.pushToTable(*name.name, funSym);
     }
 
     // print statement
@@ -246,7 +247,7 @@ std::unique_ptr<Expr> Parser::parseTerm() {
         advance();
         auto right = parsePrimary();
         left =
-            std::make_unique<binaryExpr>(op, std::move(left), std::move(right));
+            std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
     }
     return left;
 }
@@ -259,7 +260,7 @@ std::unique_ptr<Expr> Parser::parseExpr() {
         advance();
         auto right = parseTerm();
         left =
-            std::make_unique<binaryExpr>(op, std::move(left), std::move(right));
+            std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
     }
     return left;
 }
@@ -270,9 +271,9 @@ std::string toUpper(std::string str) {
     return str;
 }
 
-void funcStmt::checkRetType(Token funcT) { // fixed
+void FuncStmt::checkRetType(Token funcT) { // fixed
     if (funcT.content) {
-		retT = stringToEnum(funcT.content.value());
+        retT = stringToEnum(funcT.content.value());
 
         bool valid = retT != dataType::COUNT;
 
@@ -285,17 +286,17 @@ void funcStmt::checkRetType(Token funcT) { // fixed
     }
 }
 
-void varStmt::checkType(Token varT) {
-	if (varT.content) {
-		type = stringToEnum(varT.content.value());
+void VarStmt::checkType(Token varT) {
+    if (varT.content) {
+        type = stringToEnum(varT.content.value());
 
-		bool valid = type != dataType::COUNT;
+        bool valid = type != dataType::COUNT;
 
-		if (!valid) {
-			Parser::printError("Invalid data type present.");
-		}
+        if (!valid) {
+            Parser::printError("Invalid data type present.");
+        }
 
-	} else {
-		Parser::printError("Unexpected identifier " + *varT.name);
-	}
+    } else {
+        Parser::printError("Unexpected identifier " + *varT.name);
+    }
 }

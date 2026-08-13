@@ -1,8 +1,10 @@
 // ast.hpp
 #pragma once
 
-#include "tokenizer.hpp"
 #include "symtab.hpp"
+#include "tokenizer.hpp"
+#include "_enums.hpp"
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -10,17 +12,40 @@
 
 // types and handlers
 
-enum class dataType { Int, Str, List, Long, Llong, Short, Bool, Char, Float, COUNT };
-enum class scope { Global, Local, Block };
-
 struct Param {
-  public:
+public:
     dataType paramType;
     std::unique_ptr<Param> nxtParam;
 
-    Param(dataType pType, std::unique_ptr<Param> next) 
-        : paramType(pType), nxtParam(std::move(next)) {}
+    Param& operator=(const Param& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
 
+        paramType = other.paramType;
+
+        if (other.nxtParam) {
+            nxtParam = std::make_unique<Param>(*other.nxtParam);
+        } else {
+            nxtParam.reset();
+        }
+
+        return *this;
+    }
+
+    // Copy constructor
+    Param(const Param& other)
+        : paramType(other.paramType)
+    {
+        if (other.nxtParam) {
+            nxtParam = std::make_unique<Param>(*other.nxtParam);
+        }
+    }
+
+    // Normal constructor
+    Param(dataType pType, std::unique_ptr<Param> next)
+        : paramType(pType), nxtParam(std::move(next)) {}
 };
 
 // Program Flow:
@@ -54,17 +79,17 @@ struct PrintStmt : Stmt {
 
 struct ExitStmt : Stmt {};
 
-struct funcStmt : Stmt {
+struct FuncStmt : Stmt {
   public:
-    funcStmt() = default;
+    FuncStmt() = default;
 
-    funcStmt(std::unique_ptr<Expr> expr) : funcExpression(std::move(expr)) {}
+    FuncStmt(std::unique_ptr<Expr> expr) : funcExpression(std::move(expr)) {}
 
     std::string name;
     dataType retT;
 
     void checkRetType(Token funcT);
-    std::vector<std::unique_ptr<Stmt>> funcStmts;    
+    std::vector<std::unique_ptr<Stmt>> funcStmts;
 
     std::unique_ptr<Expr> funcExpression;
 };
@@ -87,14 +112,14 @@ struct ForStmt : Stmt {
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
-struct varStmt : Stmt {
-    public: 
-        varStmt(std::unique_ptr<Expr> expr) : varExpression(std::move(expr)) {}
-        dataType type;
-        Stmt value; // what it's actually equal to - the value of the variable
-        std::string name;
-        void checkType(Token varT);
-        std::unique_ptr<Expr> varExpression;
+struct VarStmt : Stmt {
+  public:
+    VarStmt(std::unique_ptr<Expr> expr) : varExpression(std::move(expr)) {}
+    dataType type;
+    Stmt value; // what it's actually equal to - the value of the variable
+    std::string name;
+    void checkType(Token varT);
+    std::unique_ptr<Expr> varExpression;
 };
 
 struct Number : public Expr {
@@ -102,10 +127,10 @@ struct Number : public Expr {
     Number(int v) : value(v) {}
 };
 
-struct binaryExpr : Expr {
+struct BinaryExpr : Expr {
     Token op;
 
-    binaryExpr(Token op, std::unique_ptr<Expr> l, std::unique_ptr<Expr> r)
+    BinaryExpr(Token op, std::unique_ptr<Expr> l, std::unique_ptr<Expr> r)
         : op(op), left(std::move(l)), right(std::move(r)) {}
 
     std::unique_ptr<Expr> left;

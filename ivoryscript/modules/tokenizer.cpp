@@ -4,7 +4,7 @@ using std::string, std::vector;
 
 std::vector<Token> tokenize(const std::string &contents) {
     std::vector<Token> tokens;
-    std::string currentToken;// im stupid
+    std::string currentToken; // im stupid
 
     for (int i = 0; i < contents.length(); ++i) {
         char c = contents[i];
@@ -105,7 +105,8 @@ std::vector<Token> tokenize(const std::string &contents) {
 
             // identifier
             else {
-                tokens.push_back({tokenType::identifier, word, std::make_shared<std::string>(word)});
+                tokens.push_back({tokenType::identifier, word,
+                                  std::make_shared<std::string>(word)});
             }
 
             continue;

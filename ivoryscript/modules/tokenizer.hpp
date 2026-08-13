@@ -58,9 +58,10 @@ struct Token {
 
     bool operator==(const Token &other) const {
         return this->type == other.type &&
-               this->content == other.content && // SAFE: Handles nullopt automatically
-               this->name == other.name;         // SAFE: Compares pointer addresses
+               this->content ==
+                   other.content &&      // SAFE: Handles nullopt automatically
+               this->name == other.name; // SAFE: Compares pointer addresses
     }
-};   
+};
 
 std::vector<Token> tokenize(const std::string &contents);
