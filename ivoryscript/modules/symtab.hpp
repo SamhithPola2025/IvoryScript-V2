@@ -1,7 +1,13 @@
 #pragma once
 
-#include "tokenizer.hpp"
 #include "_enums.hpp"
+#include "tokenizer.hpp"
+
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 struct Stmt;
 struct Param;
@@ -11,39 +17,16 @@ class Symbol {
     Symbol() = default;
 
     Symbol(Stmt *stmt) : defLiteral(stmt) {}
-    Symbol(const Symbol& other);
+    Symbol(const Symbol &other);
+    Symbol &operator=(const Symbol &other);
 
-    dataType type; // this would be the return type in the case of functions
+    dataType type = dataType::COUNT;
 
     std::vector<std::unique_ptr<Param>> params;
-
-    // assignment operator overload (the fix should work)
-
-    Symbol& operator=(const Symbol& other)
-    {
-        if (this == &other) {
-            return *this;
-        }
-
-        if (other.Scope != this->Scope) {
-           this->Scope = other.Scope;
-        }
-
-        
-        
-        return *this;
-    }
 
     scope Scope = scope::Global;
     Stmt *defLiteral = nullptr;
 };
-
-Symbol::Symbol(const Symbol& other)
-    : Scope(other.Scope) {
-        for (const auto& param : other.params) {
-            params.push_back(std::make_unique<Param>(*param));
-        }
-    }
 
 struct Context {
   public:
@@ -58,7 +41,10 @@ class symbolTableHandler {
   public:
     symbolTableHandler() { symbolTables.emplace_back(); }
 
-    void pushToTable(std::string name, Symbol &symbol);
-    std::pair<std::string, Symbol>
-    pullFromTable(std::string name, Symbol &symbol, bool &isFuncCall);
+    void enterScope(scope newScope);
+    void leaveScope();
+    void pushToTable(const std::string &name, const Symbol &symbol);
+    std::pair<std::string, Symbol> pullFromTable(const std::string &name,
+                                                 const Symbol &symbol,
+                                                 bool isFuncCall) const;
 };

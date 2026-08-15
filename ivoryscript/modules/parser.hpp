@@ -1,9 +1,9 @@
 // ast.hpp
 #pragma once
 
+#include "_enums.hpp"
 #include "symtab.hpp"
 #include "tokenizer.hpp"
-#include "_enums.hpp"
 
 #include <cstddef>
 #include <memory>
@@ -13,12 +13,11 @@
 // types and handlers
 
 struct Param {
-public:
+  public:
     dataType paramType;
     std::unique_ptr<Param> nxtParam;
 
-    Param& operator=(const Param& other)
-    {
+    Param &operator=(const Param &other) {
         if (this == &other) {
             return *this;
         }
@@ -35,9 +34,7 @@ public:
     }
 
     // Copy constructor
-    Param(const Param& other)
-        : paramType(other.paramType)
-    {
+    Param(const Param &other) : paramType(other.paramType) {
         if (other.nxtParam) {
             nxtParam = std::make_unique<Param>(*other.nxtParam);
         }
@@ -148,6 +145,9 @@ class Parser {
     const std::vector<Token> &tokens;
     size_t pos;
 
+    symbolTableHandler symbols;
+    scope currentScope = scope::Global;
+
     std::unique_ptr<Stmt> currentNode;
     bool isInline = false;
 
@@ -173,4 +173,5 @@ class Parser {
     std::unique_ptr<Expr> parsePrimary();
     std::unique_ptr<Expr> parseTerm();
     std::unique_ptr<Expr> parseExpr();
+    std::unique_ptr<Expr> parseComparison();
 };

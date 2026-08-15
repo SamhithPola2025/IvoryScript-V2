@@ -10,9 +10,13 @@
 #include <vector>
 
 inline int currline = 1, currcol = 1;
+inline int tokenline = 1, tokencol = 1;
 
 enum class tokenType {
     _return,
+    _if,
+    _while,
+    _for,
     int_type,
     string_type,
     bool_type,
@@ -36,6 +40,7 @@ enum class tokenType {
     exit,
     docs,
     solidus,
+    backslash,
     ampersand,
     pipe,
     asterisk,
@@ -48,6 +53,7 @@ enum class tokenType {
     less,
     greater,
     sl_comment,
+    newl,
     eof
 };
 
@@ -55,6 +61,8 @@ struct Token {
     tokenType type;
     std::optional<std::string> content;
     std::shared_ptr<std::string> name;
+    int line = tokenline;
+    int column = tokencol;
 
     bool operator==(const Token &other) const {
         return this->type == other.type &&

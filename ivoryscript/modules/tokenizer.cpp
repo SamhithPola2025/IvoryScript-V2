@@ -3,11 +3,18 @@
 using std::string, std::vector;
 
 std::vector<Token> tokenize(const std::string &contents) {
+    currline = 1;
+    currcol = 1;
+    tokenline = 1;
+    tokencol = 1;
+
     std::vector<Token> tokens;
-    std::string currentToken; // im stupid
+    std::string currentToken;
 
     for (int i = 0; i < contents.length(); ++i) {
         char c = contents[i];
+        tokenline = currline;
+        tokencol = currcol;
 
         if (c == '\n') {
             currline++;
@@ -27,6 +34,7 @@ std::vector<Token> tokenize(const std::string &contents) {
             while (i + 1 < contents.size() &&
                    (isalnum(contents[i + 1]) || contents[i + 1] == '_')) {
                 word += contents[++i];
+                ++currcol;
             }
 
             // string
@@ -63,6 +71,18 @@ std::vector<Token> tokenize(const std::string &contents) {
                 tokens.push_back({tokenType::_return});
             }
 
+            else if (word == "if") {
+                tokens.push_back({tokenType::_if});
+            }
+
+            else if (word == "while") {
+                tokens.push_back({tokenType::_while});
+            }
+
+            else if (word == "for") {
+                tokens.push_back({tokenType::_for});
+            }
+
             // print
             else if (word == "print") {
                 tokens.push_back({tokenType::print, std::nullopt});
@@ -83,8 +103,15 @@ std::vector<Token> tokenize(const std::string &contents) {
                 std::string ret_type = "void";
 
                 i++;
+                ++currcol;
 
                 while (i < contents.size() && isspace(contents[i])) {
+                    if (contents[i] == '\n') {
+                        ++currline;
+                        currcol = 1;
+                    } else {
+                        ++currcol;
+                    }
                     i++;
                 }
 
@@ -93,6 +120,7 @@ std::vector<Token> tokenize(const std::string &contents) {
 
                     while (i < contents.size() && isalpha(contents[i])) {
                         possible_type += contents[i];
+                        ++currcol;
                         i++;
                     }
 
@@ -118,6 +146,7 @@ std::vector<Token> tokenize(const std::string &contents) {
 
             while (i + 1 < contents.length() && isdigit(contents[i + 1])) {
                 currentToken += contents[++i];
+                ++currcol;
             }
 
             tokens.push_back({tokenType::integer_lit, currentToken});
@@ -131,14 +160,53 @@ std::vector<Token> tokenize(const std::string &contents) {
 
             while (j < contents.size() && contents[j] != '"') {
                 value.push_back(contents[j]);
+                if (contents[j] == '\n') {
+                    ++currline;
+                    currcol = 1;
+                } else {
+                    ++currcol;
+                }
                 j++;
             }
 
             if (j < contents.size() && contents[j] == '"') {
+                ++currcol;
                 tokens.push_back({tokenType::string_lit, value});
                 i = j;
                 continue;
             }
+        }
+
+        // Comments are ignored here so the parser never needs to handle them.
+        if (contents.substr(i, 2) == "//") {
+            i += 2;
+            ++currcol; // The outer loop already counted the first '/'.
+            while (i < contents.size() && contents[i] != '\n') {
+                ++currcol;
+                ++i;
+            }
+            --i; // Let the outer loop process the newline normally.
+            continue;
+        }
+
+        if (contents.substr(i, 2) == "/*") {
+            i += 2;
+            ++currcol; // The outer loop already counted the first '/'.
+            while (i + 1 < contents.size() && contents.substr(i, 2) != "*/") {
+                if (contents[i] == '\n') {
+                    ++currline;
+                    currcol = 1;
+                } else {
+                    ++currcol;
+                }
+                ++i;
+            }
+
+            if (i + 1 < contents.size()) {
+                currcol += 2; // Count the closing '*' and '/'.
+                ++i;          // The outer loop skips the closing '/'.
+            }
+            continue;
         }
 
         // operators
@@ -170,7 +238,6 @@ std::vector<Token> tokenize(const std::string &contents) {
         case ';':
             tokens.push_back({tokenType::semicolon, std::nullopt});
             continue;
-
         case '=':
             tokens.push_back({tokenType::equal, std::nullopt});
             continue;
@@ -178,7 +245,9 @@ std::vector<Token> tokenize(const std::string &contents) {
         case '(':
             tokens.push_back({tokenType::open_paren, std::nullopt});
             continue;
-
+        case '\\':
+            tokens.push_back({tokenType::backslash, std::nullopt});
+            continue;
         case ')':
             tokens.push_back({tokenType::close_paren, std::nullopt});
             continue;
@@ -215,6 +284,10 @@ std::vector<Token> tokenize(const std::string &contents) {
             tokens.push_back({tokenType::asterisk, std::nullopt});
             continue;
 
+        case '/':
+            tokens.push_back({tokenType::solidus, std::nullopt});
+            continue;
+
         case '%':
             tokens.push_back({tokenType::percent, std::nullopt});
             continue;
@@ -233,6 +306,8 @@ std::vector<Token> tokenize(const std::string &contents) {
         }
     }
 
+    tokenline = currline;
+    tokencol = currcol;
     tokens.push_back({tokenType::eof, std::nullopt});
 
     return tokens;

@@ -1,8 +1,8 @@
 // main.cpp
+#include "modules/helpers.hpp"
 #include "modules/parser.hpp"
 #include "modules/repl.hpp"
 #include "modules/tokenizer.hpp"
-#include "modules/helpers.hpp"
 
 #include <iterator>
 

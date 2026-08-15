@@ -28,6 +28,12 @@ std::string tokenTypeToString(tokenType tType) {
     switch (tType) {
     case tokenType::_return:
         return "return";
+    case tokenType::_if:
+        return "if";
+    case tokenType::_while:
+        return "while";
+    case tokenType::_for:
+        return "for";
     case tokenType::integer_lit:
         return "integer_lit";
     case tokenType::semicolon:

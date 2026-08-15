@@ -1,52 +1,62 @@
 // symtab.cpp
 #include "symtab.hpp"
-#include "tokenizer.hpp"
 #include "parser.hpp"
 
-void symbolTableHandler::pushToTable(std::string name, Symbol &symbol) {
-    long scopes = symbolTables.size();
-
-    if (symbol.Scope != symbolTables.back().Scope) {
-        for (int i = 0; i < scopes; ++i) {
-            auto &s = symbolTables[i];
-
-            if (s.Scope == symbol.Scope) {
-                symbolTables[i].symbols[name] = symbol;
-            } else {
-                continue;
-            }
-        }
-    } else {
-        symbolTables.emplace_back(
-            Context({symbol.Scope})); // agreggate initialization
-        symbolTables.back().symbols[name] = symbol;
+Symbol::Symbol(const Symbol &other)
+    : type(other.type), Scope(other.Scope), defLiteral(other.defLiteral) {
+    for (const auto &param : other.params) {
+        params.push_back(std::make_unique<Param>(*param));
     }
 }
 
-std::pair<std::string, Symbol>
-symbolTableHandler::pullFromTable(std::string name, Symbol &symbol,
-                                  bool &isFuncCall) {
-    bool isFound = false;
+Symbol &Symbol::operator=(const Symbol &other) {
+    if (this == &other) {
+        return *this;
+    }
 
-    if (symbol.Scope == symbolTables.back().Scope) {
-        std::clog << "matched";
-        return make_pair(name, symbolTables.back().symbols[name]);
-    } else {
-        for (int i = symbolTables.size() - 1; i >= 0; ++i) {
-            if (symbolTables[i].Scope == symbol.Scope) {
-                return make_pair(name, symbolTables[i].symbols[name]);
-                isFound = true;
-            } else {
-                continue;
-                isFound = false;
-            }
+    type = other.type;
+    Scope = other.Scope;
+    defLiteral = other.defLiteral;
+    params.clear();
+    for (const auto &param : other.params) {
+        params.push_back(std::make_unique<Param>(*param));
+    }
+    return *this;
+}
+
+void symbolTableHandler::enterScope(scope newScope) {
+    symbolTables.push_back(Context{newScope});
+}
+
+void symbolTableHandler::leaveScope() {
+    if (symbolTables.size() > 1) {
+        symbolTables.pop_back();
+    }
+}
+
+void symbolTableHandler::pushToTable(const std::string &name,
+                                     const Symbol &symbol) {
+    symbolTables.back().symbols[name] = symbol;
+}
+
+std::pair<std::string, Symbol>
+symbolTableHandler::pullFromTable(const std::string &name, const Symbol &symbol,
+                                  bool isFuncCall) const {
+    for (auto table = symbolTables.rbegin(); table != symbolTables.rend();
+         ++table) {
+        if (table->Scope != symbol.Scope) {
+            continue;
         }
 
-        if (!isFound) {
-            Parser::printError(
-                (std::string) "Invalid " +
-                (isFuncCall ? "function called: " : "variable accessed: ") +
-                name + "\n");
+        const auto found = table->symbols.find(name);
+        if (found != table->symbols.end()) {
+            return {name, found->second};
         }
     }
+
+    Parser::printError(
+        "Invalid " +
+        std::string(isFuncCall ? "function called: " : "variable accessed: ") +
+        name);
+    return {name, Symbol{}};
 }

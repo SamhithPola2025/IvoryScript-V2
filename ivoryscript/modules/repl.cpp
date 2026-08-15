@@ -37,9 +37,9 @@ int replEval::replLoop() {
     std::string content;
     std::vector<std::string> lines;
 
-    while (true) {
         while (std::getline(std::cin, content)) {
-            if (content.empty()) {
+            if (content.
+                empty()) {
                 break;
             }
 
@@ -54,15 +54,18 @@ int replEval::replLoop() {
             }
 
             content.append(lines[i]);
+        
         }
 
-        std::vector<Token> tokens = tokenize(content);
+        std::vector<Token> tokens = 
+        tokenize(content);
 
         Parser currParser(tokens);
         std::unique_ptr<Program> currProgram;
 
         currProgram = currParser.parseProgram();
-    }
+
+    std::cout << "this is just a test place for another breakpoint ig " << "\n";
 
     return 0;
 }
