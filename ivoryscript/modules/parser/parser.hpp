@@ -1,9 +1,9 @@
 // ast.hpp
 #pragma once
 
-#include "_enums.hpp"
+#include "../helpers/_enums.hpp"
 #include "symtab.hpp"
-#include "tokenizer.hpp"
+#include "../tokenizer/tokenizer.hpp"
 
 #include <cstddef>
 #include <memory>
@@ -112,9 +112,10 @@ struct ForStmt : Stmt {
 struct VarStmt : Stmt {
   public:
     VarStmt(std::unique_ptr<Expr> expr) : varExpression(std::move(expr)) {}
-    dataType type;
+    dataType type; // the type of the variable, not to be confused with value
     Stmt value; // what it's actually equal to - the value of the variable
-    std::string name;
+
+    std::string name; // identifier name, not that it matters too much but we retain this info into parsing
     void checkType(Token varT);
     std::unique_ptr<Expr> varExpression;
 };
@@ -132,6 +133,14 @@ struct BinaryExpr : Expr {
 
     std::unique_ptr<Expr> left;
     std::unique_ptr<Expr> right;
+};
+
+struct CharExpr : Expr {
+    Token _char;
+};
+
+struct StringExpr : Expr {
+    Token _str;
 };
 
 struct ExprStmt : public Stmt {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "_enums.hpp"
-#include "tokenizer.hpp"
+#include "../helpers/_enums.hpp"
+#include "../tokenizer/tokenizer.hpp"
 
 #include <memory>
 #include <string>

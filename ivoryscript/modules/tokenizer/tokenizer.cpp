@@ -177,6 +177,27 @@ std::vector<Token> tokenize(const std::string &contents) {
             }
         }
 
+        // char literal
+        if (c == '\'') {
+            char value;
+            int j = i + 1;
+
+            if (j < contents.size() && contents[j] != '\'') {
+                value = contents[j];
+                currcol++;
+                j++;
+            } else {
+                std::cerr << "Size of char literal is invalid or contains invalid data." << "\n";
+            }
+
+            if (j < contents.size() && contents[j] == '\'') {
+                ++currcol;
+                i = j;
+
+                tokens.push_back({tokenType::char_lit, std::string(1,value)});
+            }
+        }
+
         // Comments are ignored here so the parser never needs to handle them.
         if (contents.substr(i, 2) == "//") {
             i += 2;
@@ -241,7 +262,6 @@ std::vector<Token> tokenize(const std::string &contents) {
         case '=':
             tokens.push_back({tokenType::equal, std::nullopt});
             continue;
-
         case '(':
             tokens.push_back({tokenType::open_paren, std::nullopt});
             continue;
@@ -262,6 +282,14 @@ std::vector<Token> tokenize(const std::string &contents) {
 
         case ',':
             tokens.push_back({tokenType::comma, std::nullopt});
+            continue;
+
+        case '\'':
+            tokens.push_back({tokenType::single_quote, std::nullopt});
+            continue;
+
+        case '"':
+            tokens.push_back({tokenType::double_quote, std::nullopt});
             continue;
 
         case '|':

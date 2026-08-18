@@ -1,8 +1,8 @@
 // helpers.hpp
 #pragma once
 
-#include "parser.hpp"
-#include "tokenizer.hpp"
+#include "../parser/parser.hpp"
+#include "../tokenizer/tokenizer.hpp"
 
 dataType stringToEnum(std::string str);
 

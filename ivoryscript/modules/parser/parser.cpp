@@ -1,8 +1,8 @@
 // parser.cpp
 #include "parser.hpp"
-#include "helpers.hpp"
+#include "../helpers/helpers.hpp"
 #include "symtab.hpp"
-#include "tokenizer.hpp"
+#include "../tokenizer/tokenizer.hpp"
 
 #include <cassert>
 #include <memory>
@@ -132,9 +132,9 @@ std::unique_ptr<Program> Parser::parseProgram() {
 }
 
 std::unique_ptr<Stmt> Parser::parseStmt() {
-    // Comments were removed by the tokenizer before the parser sees tokens.
+    // comments were removed prior to the parser seeing them.
 
-    // Variable declaration: int count = 0;
+    // variable declaration example: int count = 0;
     for (tokenType typeToken : varTypes) {
         if (peek().type != typeToken) {
             continue;
@@ -156,6 +156,7 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
         if (!value) {
             return nullptr;
         }
+
         expect(tokenType::semicolon);
 
         auto variable = std::make_unique<VarStmt>(std::move(value));
@@ -367,27 +368,44 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
         return nullptr;
     }
 
-    for (tokenType c : varTypes) {
-        //   if (peek.type() == )
-    }
-
     std::unique_ptr<ExprStmt> stmt = std::make_unique<ExprStmt>();
     stmt->expr = std::move(expr);
     return stmt;
 }
 
 std::unique_ptr<Expr> Parser::parsePrimary() {
-    Token t = peek();
-    if (t.type == tokenType::integer_lit) {
-        advance();
-        return std::make_unique<Number>(std::stoi(*t.content));
+    if (peek().type == tokenType::char_lit) {
+        CharExpr exprb;
+
+        if (peek().content.value().length() != 1) {
+            error("Invalid string type in char container.");
+        } else {
+            exprb._char = peek();
+            return std::make_unique<CharExpr>(exprb);
+        }
+    } else if (peek().type == tokenType::string_lit) {
+        StringExpr exprc;
+
+        if (peek().content.value().length() >= 1) {
+            exprc._str = peek();
+            return std::make_unique<StringExpr>(exprc);
+            // i'll handle string concatenation later
+        } else {
+            return nullptr;
+        }
     }
-    if (t.type == tokenType::open_paren) {
+
+    if (peek().type == tokenType::integer_lit) {
+        advance();
+        return std::make_unique<Number>(std::stoi(*peek().content));
+    }
+    if (peek().type == tokenType::open_paren) {
         advance();
         auto expr = parseExpr();
         expect(tokenType::close_paren);
         return expr;
     }
+
     error("Invalid expression.");
     return nullptr;
 }
@@ -410,15 +428,25 @@ std::unique_ptr<Expr> Parser::parseTerm() {
         left =
             std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
     }
+
     return left;
+
+    // if char I believe this just returns the char and same goes for parseexpr
+    // or that might be bs
 }
 
 std::unique_ptr<Expr> Parser::parseExpr() {
     auto left = parseTerm();
+
     if (!left) {
         return nullptr;
     }
-    while (peek().type == tokenType::plus || peek().type == tokenType::minus) {
+
+    while (peek().type == tokenType::plus ||
+     peek().type == tokenType::minus ||
+     peek().type == tokenType::asterisk ||
+     peek().type == tokenType::solidus) {
+
         Token op = peek();
         advance();
         auto right = parseTerm();
@@ -428,6 +456,7 @@ std::unique_ptr<Expr> Parser::parseExpr() {
         left =
             std::make_unique<BinaryExpr>(op, std::move(left), std::move(right));
     }
+
     return left;
 }
 
