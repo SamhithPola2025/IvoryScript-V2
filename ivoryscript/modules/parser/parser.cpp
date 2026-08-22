@@ -299,11 +299,13 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
 
     if (peek().type == tokenType::func_type) {
         Token functionToken = peek();
-        advance();
 
-        if (peek().type != tokenType::identifier) {
-            error("Expected function name.");
+        if (!peek().content ||
+            stringToEnum(peek().content.value()) == dataType::COUNT) {
+            error("Expected function return type.");
             return nullptr;
+        } else {
+            advance();
         }
 
         auto function = std::make_unique<FuncStmt>();
@@ -381,6 +383,8 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
             error("Invalid string type in char container.");
         } else {
             exprb._char = peek();
+            advance();
+
             return std::make_unique<CharExpr>(exprb);
         }
     } else if (peek().type == tokenType::string_lit) {
@@ -388,6 +392,8 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
 
         if (peek().content.value().length() >= 1) {
             exprc._str = peek();
+            advance();
+
             return std::make_unique<StringExpr>(exprc);
             // i'll handle string concatenation later
         } else {
@@ -396,9 +402,17 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
     }
 
     if (peek().type == tokenType::integer_lit) {
-        advance();
-        return std::make_unique<Number>(std::stoi(*peek().content));
+        const std::string &str = *peek().content;
+
+        if (!str.empty() &&
+            std::isdigit(static_cast<unsigned char>(str[0]))) {
+            advance();
+            return std::make_unique<Number>(std::stoi(str));
+        }
+
+        return nullptr;
     }
+
     if (peek().type == tokenType::open_paren) {
         advance();
         auto expr = parseExpr();

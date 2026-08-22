@@ -100,7 +100,7 @@ std::vector<Token> tokenize(const std::string &contents) {
 
             // function
             else if (word == "func") {
-                std::string ret_type = "void";
+            std::string ret_type = "void";
 
                 i++;
                 ++currcol;
@@ -185,6 +185,7 @@ std::vector<Token> tokenize(const std::string &contents) {
             if (j < contents.size() && contents[j] != '\'') {
                 value = contents[j];
                 currcol++;
+                
                 j++;
             } else {
                 std::cerr << "Size of char literal is invalid or contains invalid data." << "\n";
@@ -195,6 +196,7 @@ std::vector<Token> tokenize(const std::string &contents) {
                 i = j;
 
                 tokens.push_back({tokenType::char_lit, std::string(1,value)});
+                continue;
             }
         }
 
