@@ -1,0 +1,13 @@
+// literals.ivc
+// Exercises every literal form the tokenizer currently supports:
+// integer, string, char, and boolean literals.
+
+int n = 42;
+string greeting = "hi";
+bool flag = true;
+int letter = 'a';
+
+print(n);
+print(greeting);
+print(flag);
+print(letter);

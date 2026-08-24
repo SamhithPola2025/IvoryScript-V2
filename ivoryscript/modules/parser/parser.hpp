@@ -76,6 +76,8 @@ struct PrintStmt : Stmt {
 
 struct ExitStmt : Stmt {};
 
+struct DocsStmt : Stmt {};
+
 struct FuncStmt : Stmt {
   public:
     FuncStmt() = default;
@@ -105,7 +107,7 @@ struct WhileStmt : Stmt {
 struct ForStmt : Stmt {
     std::unique_ptr<Stmt> init;
     std::unique_ptr<Expr> condition;
-    std::unique_ptr<Expr> increment;
+    std::unique_ptr<Stmt> increment;
     std::vector<std::unique_ptr<Stmt>> body;
 };
 
@@ -120,9 +122,28 @@ struct VarStmt : Stmt {
     std::unique_ptr<Expr> varExpression;
 };
 
+struct AssignStmt : Stmt {
+  public:
+    AssignStmt(std::string n, std::unique_ptr<Expr> expr)
+        : name(std::move(n)), value(std::move(expr)) {}
+
+    std::string name;
+    std::unique_ptr<Expr> value;
+};
+
 struct Number : public Expr {
     int value;
     Number(int v) : value(v) {}
+};
+
+struct BoolExpr : public Expr {
+    bool value;
+    BoolExpr(bool v) : value(v) {}
+};
+
+struct IdentifierExpr : public Expr {
+    IdentifierExpr(std::string n) : name(std::move(n)) {}
+    std::string name;
 };
 
 struct BinaryExpr : Expr {
@@ -172,6 +193,9 @@ class Parser {
   public:
     Parser(const std::vector<Token> &t);
     std::unique_ptr<Program> parseProgram();
+
+    bool quitRepl = false;
+    bool helpRepl = false;
 
     void error(const std::string &message);
     static void printError(const std::string &message);

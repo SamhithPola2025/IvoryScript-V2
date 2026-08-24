@@ -1,0 +1,6 @@
+// for_init_test.ivc
+// Testing what works in the for-init position.
+
+for (int i = 0; i < 2; i = i + 1;) {
+    print("loop");
+}

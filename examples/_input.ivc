@@ -1,0 +1,17 @@
+// This is a comment, the parser should ignore this.
+
+func int idk() {
+    print("something");
+    print((2*3)+2);
+
+    if (1) {
+        print("ok");
+    }
+
+    return 0;
+}
+
+// This return below is consumed by the operating system, it is not mandatory.
+// It can be used if the result of the program is consumed by another application or is used otherwise.
+
+return 0;

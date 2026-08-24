@@ -44,6 +44,7 @@ class symbolTableHandler {
     void enterScope(scope newScope);
     void leaveScope();
     void pushToTable(const std::string &name, const Symbol &symbol);
+    bool updateSymbol(const std::string &name, const Symbol &symbol);
     std::pair<std::string, Symbol> pullFromTable(const std::string &name,
                                                  const Symbol &symbol,
                                                  bool isFuncCall) const;

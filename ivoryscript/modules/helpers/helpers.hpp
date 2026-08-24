@@ -8,4 +8,6 @@ dataType stringToEnum(std::string str);
 
 std::string tokenTypeToString(tokenType tType);
 
-bool isControlFlow(std::unique_ptr<Stmt> given);
+std::string isControlFlow(std::unique_ptr<Stmt> given);
+
+const char *operatorText(tokenType type);

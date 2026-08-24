@@ -1,0 +1,10 @@
+// comparisons.ivc
+// Exercises comparison operators. Each comparison is wrapped in
+// a top-level expression statement so the AST contains BinaryExpr nodes.
+
+1 == 1;
+1 != 2;
+3 < 4;
+4 <= 4;
+5 > 2;
+6 >= 6;

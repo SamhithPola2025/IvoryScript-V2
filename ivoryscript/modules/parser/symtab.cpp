@@ -39,15 +39,24 @@ void symbolTableHandler::pushToTable(const std::string &name,
     symbolTables.back().symbols[name] = symbol;
 }
 
+bool symbolTableHandler::updateSymbol(const std::string &name,
+                                      const Symbol &symbol) {
+    for (auto table = symbolTables.rbegin(); table != symbolTables.rend();
+         ++table) {
+        const auto found = table->symbols.find(name);
+        if (found != table->symbols.end()) {
+            found->second = symbol;
+            return true;
+        }
+    }
+    return false;
+}
+
 std::pair<std::string, Symbol>
 symbolTableHandler::pullFromTable(const std::string &name, const Symbol &symbol,
                                   bool isFuncCall) const {
     for (auto table = symbolTables.rbegin(); table != symbolTables.rend();
          ++table) {
-        if (table->Scope != symbol.Scope) {
-            continue;
-        }
-
         const auto found = table->symbols.find(name);
         if (found != table->symbols.end()) {
             return {name, found->second};

@@ -1,0 +1,4 @@
+// hello.ivc
+// Minimal sanity check: a single string literal printed at top level.
+
+print("hello, ivoryscript");

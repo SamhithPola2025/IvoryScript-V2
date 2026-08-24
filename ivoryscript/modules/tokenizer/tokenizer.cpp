@@ -88,11 +88,6 @@ std::vector<Token> tokenize(const std::string &contents) {
                 tokens.push_back({tokenType::print, std::nullopt});
             }
 
-            // exit
-            else if (word == "exit") {
-                tokens.push_back({tokenType::exit});
-            }
-
             // bool literal
             else if (word == "true" || word == "false") {
                 tokens.push_back({tokenType::bool_lit, word});

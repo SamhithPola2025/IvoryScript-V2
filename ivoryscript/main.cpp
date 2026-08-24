@@ -3,6 +3,7 @@
 #include "modules/parser/parser.hpp"
 #include "modules/repl/repl.hpp"
 #include "modules/tokenizer/tokenizer.hpp"
+#include "modules/bytecodevm/traverser.hpp"
 
 #include <iterator>
 
@@ -18,8 +19,8 @@ std::ostream &operator<<(std::ostream &os, const Token &token) {
 
 int main(int argc, char *argv[]) {
     if (argc == 1) {
-        replEval *REPL;
-        REPL->replLoop();
+        replEval REPL;
+        REPL.replLoop();
 
         return 0;
     } else if (argc != 2) {
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
 
     if (!input) {
         if (!fs::exists(argv[1])) {
-            std::cerr << "File" << argv[1] << " doesn't exist or is corrupted"
+            std::cerr << "File " << argv[1] << " doesn't exist or is corrupted"
                       << std::endl;
         } else {
             std::cerr << "Failed to open/read file: " << argv[1] << std::endl;
@@ -44,23 +45,19 @@ int main(int argc, char *argv[]) {
     std::string content{std::istreambuf_iterator<char>(input),
                         std::istreambuf_iterator<char>()};
 
-    // std::cout << content << std::endl;
-
     // tokenizing
 
     std::vector<Token> tokens = tokenize(content);
-
-    for (const Token &token : tokens) {
-        std::cout << token << "\n";
-    }
 
     // parsing
 
     Parser p(tokens);
     std::unique_ptr<Program> program = p.parseProgram();
 
-    std::cout << "placeholder btw" << std::endl;
-    std::cout << "idfk" << std::endl;
+    // printing AST (intermediate step)
+
+    Traverser traverser(*program);
+    traverser.printAst();
 
     return 0;
 }

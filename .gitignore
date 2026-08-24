@@ -1,6 +1,7 @@
 .vscode
 CMakeLists.txt
 build
+release
 .DS_Store
 *.exe
 *.dll

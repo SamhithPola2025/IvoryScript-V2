@@ -67,16 +67,43 @@ std::string tokenTypeToString(tokenType tType) {
     }
 }
 
-bool isControlFlow(std::unique_ptr<Stmt> given) {
+std::string isControlFlow(std::unique_ptr<Stmt> given) {
     if (typeid(*given) == typeid(FuncStmt)) {
-        return true;
+        return "Function Statement";
     } else if (typeid(*given) == typeid(IfStmt)) {
-        return true;
+        return "If Statement";
     } else if (typeid(*given) == typeid(WhileStmt)) {
-        return true;
+        return "While Loop";
     } else if (typeid(*given) == typeid(ForStmt)) {
-        return true;
+        return "For Loop";
     } else {
-        return false;
+        return "\0";
+    }
+}
+
+const char *operatorText(tokenType type) {
+    switch (type) {
+    case tokenType::plus:
+        return "+";
+    case tokenType::minus:
+        return "-";
+    case tokenType::asterisk:
+        return "*";
+    case tokenType::solidus:
+        return "/";
+    case tokenType::equal_equal:
+        return "==";
+    case tokenType::not_equal:
+        return "!=";
+    case tokenType::less:
+        return "<";
+    case tokenType::less_equal:
+        return "<=";
+    case tokenType::greater:
+        return ">";
+    case tokenType::greater_equal:
+        return ">=";
+    default:
+        return "<unknown operator>";
     }
 }

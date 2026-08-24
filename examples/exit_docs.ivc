@@ -1,0 +1,9 @@
+// exit_docs.ivc
+// Tests parsing of exit() and docs() built-in statements.
+
+print("before docs");
+docs();
+print("between");
+exit();
+print("after exit - should not be reached");
+print("this is visible in the AST, but will not be reached in bytecode");

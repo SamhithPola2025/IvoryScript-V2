@@ -57,7 +57,6 @@ void Parser::expect(tokenType expected) {
     advance();
 }
 
-// wtf is this func why did i write this
 bool Parser::match(tokenType token) {
     if (peek().type == token) {
         advance();
@@ -87,6 +86,8 @@ bool Parser::isExpStarter(tokenType type) {
         return true;
     case tokenType::integer_lit:
         return true;
+    case tokenType::identifier:
+        return true;
     default:
         return false;
     }
@@ -96,13 +97,13 @@ void Parser::error(const std::string &message) {
     const Token &token = peek();
     std::cerr << "Error on line " << token.line << " column "
               << token.column << ". " << message << std::endl;
-    // exit(1); commented for debugging purposes
+    exit(1);
 }
 
 void Parser::printError(const std::string &message) {
     std::cerr << "Error on line " << currline << " column " << currcol << ". "
               << message << std::endl;
-    // exit(1); commented for debugging purposes
+    exit(1);
 }
 
 std::unique_ptr<Program> Parser::parseProgram() {
@@ -110,19 +111,12 @@ std::unique_ptr<Program> Parser::parseProgram() {
     while (peek().type != tokenType::eof) {
         size_t startPos = pos;
         std::unique_ptr<Stmt> stmt = parseStmt();
-        // std::unique_ptr<Stmt> inlineStmt = parseStmt();
-
-        /*
-        if (isInline && inlineStmt) {
-            program->statements[]
-        } else if (stmt) */
 
         if (stmt) {
             program->statements.push_back(std::move(stmt));
         }
-
-        // Prevent an infinite loop if parseStmt reports an error without
-        // consuming input.
+        
+        // prevents infinite looping if parsestmt for some reason doesn't advance.
         if (pos == startPos && peek().type != tokenType::eof) {
             advance();
         }
@@ -133,6 +127,29 @@ std::unique_ptr<Program> Parser::parseProgram() {
 
 std::unique_ptr<Stmt> Parser::parseStmt() {
     // comments were removed prior to the parser seeing them.
+
+    // reassignment: name = expr;
+    if (peek().type == tokenType::identifier && peekNext().type == tokenType::equal) {
+        const std::string name = *peek().content;
+        Symbol placeholder;
+        placeholder.Scope = currentScope;
+        symbols.pullFromTable(name, placeholder, false);
+        advance(); // identifier
+        advance(); // =
+        auto value = parseExpr();
+        if (!value) {
+            return nullptr;
+        }
+        expect(tokenType::semicolon);
+
+        Symbol updated;
+        updated.Scope = currentScope;
+        updated.defLiteral = nullptr;
+        if (!symbols.updateSymbol(name, updated)) {
+            error("Cannot reassign undeclared variable '" + name + "'.");
+        }
+        return std::make_unique<AssignStmt>(name, std::move(value));
+    }
 
     // variable declaration example: int count = 0;
     for (tokenType typeToken : varTypes) {
@@ -250,24 +267,33 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
         advance();
         expect(tokenType::open_paren);
 
-        auto initExpression = parseExpr();
-        if (!initExpression) {
-            return nullptr;
+        std::unique_ptr<Stmt> initStatement;
+        if (peek().type != tokenType::semicolon) {
+            initStatement = parseStmt();
+            if (!initStatement) {
+                return nullptr;
+            }
+        } else {
+            advance();
         }
-        auto initStatement = std::make_unique<ExprStmt>();
-        initStatement->expr = std::move(initExpression);
+
+        std::unique_ptr<Expr> condition;
+        if (peek().type != tokenType::semicolon) {
+            condition = parseComparison();
+            if (!condition) {
+                return nullptr;
+            }
+        }
         expect(tokenType::semicolon);
 
-        auto condition = parseComparison();
-        if (!condition) {
-            return nullptr;
+        std::unique_ptr<Stmt> increment;
+        if (peek().type != tokenType::close_paren) {
+            increment = parseStmt();
+            if (!increment) {
+                return nullptr;
+            }
         }
-        expect(tokenType::semicolon);
 
-        auto increment = parseExpr();
-        if (!increment) {
-            return nullptr;
-        }
         expect(tokenType::close_paren);
         expect(tokenType::open_brace);
 
@@ -356,8 +382,30 @@ std::unique_ptr<Stmt> Parser::parseStmt() {
         return std::make_unique<PrintStmt>(std::move(expr));
     }
 
-    // Allow expression statements like: 5 + 6 * 8;
-    std::unique_ptr<Expr> expr = parseExpr();
+    // exit() - halt the program
+    if (peek().type == tokenType::exit) {
+        quitRepl = true;
+
+        advance();
+        expect(tokenType::open_paren);
+        expect(tokenType::close_paren);
+        expect(tokenType::semicolon);
+        return std::make_unique<ExitStmt>();
+    }
+
+    // docs() - print documentation
+    if (peek().type == tokenType::docs) {
+        helpRepl = true;
+
+        advance();
+        expect(tokenType::open_paren);
+        expect(tokenType::close_paren);
+        expect(tokenType::semicolon);
+        return std::make_unique<DocsStmt>();
+    }
+
+    // Allow expression statements like: 5 + 6 * 8; or 1 == 1;
+    std::unique_ptr<Expr> expr = parseComparison();
     if (!expr) {
         error("Unknown Statement");
         return nullptr;
@@ -413,11 +461,24 @@ std::unique_ptr<Expr> Parser::parsePrimary() {
         return nullptr;
     }
 
+    if (peek().type == tokenType::bool_lit) {
+        const std::string &str = *peek().content;
+        bool value = (str == "true");
+        advance();
+        return std::make_unique<BoolExpr>(value);
+    }
+
     if (peek().type == tokenType::open_paren) {
         advance();
         auto expr = parseExpr();
         expect(tokenType::close_paren);
         return expr;
+    }
+
+    if (peek().type == tokenType::identifier) {
+        std::string name = *peek().content;
+        advance();
+        return std::make_unique<IdentifierExpr>(name);
     }
 
     error("Invalid expression.");
