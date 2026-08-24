@@ -12,7 +12,7 @@ IvoryScript is a compiled programming language that is made entirely in C++ comp
 All code that you write must adhere to the languages syntax and rules, to understand those in more depth, please refer to the `docs/specs` folder. If you want to check this out without writing your own programs, I left a few sample programs in the `examples` folder that are ready to run without any syntax errors.
 
 ## Installation and instructions for use
-To use IvoryScript, download the executable from <placeholder here for github releases page> and run it in your terminal with your second argument any file given it is in the IvoryScript file format that you wish to run. An example is written below:
+To use IvoryScript, download the executable from [the GitHub releases page](https://github.com/SamhithPola2025/IvoryScript-V2/releases/tag/v1.0.0) and run it in your terminal with your second argument any file given it is in the IvoryScript file format that you wish to run. An example is written below:
 
 ``./ivoryscriptV2 test.ivc``
 
