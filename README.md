@@ -48,6 +48,6 @@ Currently generated AST:
   Exit
 ```
 
-![alt text](image-1.png)
-![alt text](image.png)
-![alt text](image.png)
+![alt text](readme-images/image-1.png)
+![alt text](readme-images/image.png)
+![alt text](readme-images/image.png)
